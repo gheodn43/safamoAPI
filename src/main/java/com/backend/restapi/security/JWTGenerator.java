@@ -2,6 +2,7 @@ package com.backend.restapi.security;
 
 
 import java.util.Date;
+import java.util.List;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -53,18 +54,17 @@ public class JWTGenerator {
 	            .getBody();
 	    
 	    Integer userId = claims.get("userId", Integer.class);
-	    System.out.println("user id:");
-	    System.out.println(userId);
 	    return userId;
 	}
 	
-	public String[] getRolesFromJWT(String token) {
+	public List<String> getRolesFromJWT(String token) {
 	    Claims claims = Jwts.parserBuilder()
 	            .setSigningKey(key)
 	            .build()
 	            .parseClaimsJws(token)
 	            .getBody();
-	    return claims.get("roles", String[].class);
+	    List<String> roles = claims.get("roles", List.class); // Chỉ định kiểu là List<String>
+	    return roles;
 	}
 	public boolean validateToken(String token) {
 		try {

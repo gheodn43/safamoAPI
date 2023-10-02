@@ -56,6 +56,9 @@ public class UserEntity {
     )
     private List<GPSAddress> gpsAddresses = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Request> requests;
+
     
 	public String getAddress() {
 		return address;

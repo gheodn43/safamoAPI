@@ -36,7 +36,6 @@ public class SecurityConfig {
                 .and()
                 .logout()
                 .logoutUrl("/api/logout")
-                .logoutSuccessUrl("/login")
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID");
     }
@@ -49,6 +48,8 @@ public class SecurityConfig {
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .cors() // Sử dụng cài đặt CORS từ bước 1
                 .and()
                 .authorizeRequests()
                 .requestMatchers("/api/auth/**").permitAll()

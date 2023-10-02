@@ -105,7 +105,7 @@ public class AuthController {
 		user.setUsername(registerDto.getUsername());
 		user.setPassword(passwordEncoder.encode((registerDto.getPassword())));
 		user.setEmail(registerDto.getEmail());
-		Role roles = roleRepository.findByName("ADMIN").orElse(null);
+		Role roles = roleRepository.findByName("CUSTOMER").orElse(null);
 		if (roles != null) {
 			user.setRoles(Collections.singletonList(roles));
 		}

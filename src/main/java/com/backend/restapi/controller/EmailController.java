@@ -23,9 +23,12 @@ public class EmailController {
 
     @PostMapping("sendOtpEmailRegister")
     public ResponseEntity<String> sendOtpEmailRegister(@RequestBody RegisterDto registerDto) {
-        if (userRepository.existsByEmail(registerDto.getEmail())) {
-            return new ResponseEntity<>("Email is taken!", HttpStatus.BAD_REQUEST);
-        }
+		if (userRepository.existsByUsername(registerDto.getUsername())) {
+			return new ResponseEntity<>("Username is taken!", HttpStatus.BAD_REQUEST);
+		}
+//        if (userRepository.existsByEmail(registerDto.getEmail())) {
+//            return new ResponseEntity<>("Email is taken!", HttpStatus.BAD_REQUEST);
+//        }
         try {
             emailService.sendOtpEmailRegister(registerDto.getEmail(), registerDto.getUsername());
             return ResponseEntity.ok("Email OTP đã được gửi thành công.");
