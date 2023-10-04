@@ -6,6 +6,7 @@ public class RequestDto {
 	String requestStatus;
 	String description;
 	String username;
+	int user_id;
 	String timeStamp;
 	public int getId() {
 		return id;
@@ -36,6 +37,13 @@ public class RequestDto {
 	}
 	public void setUsername(String username) {
 		this.username = username;
+	}
+	
+	public int getUser_id() {
+		return user_id;
+	}
+	public void setUser_id(int user_id) {
+		this.user_id = user_id;
 	}
 	public String getTimeStamp() {
 		return timeStamp;

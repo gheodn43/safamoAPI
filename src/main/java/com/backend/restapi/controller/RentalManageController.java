@@ -70,6 +70,24 @@ public class RentalManageController {
 		}
 
 	}
+	
+	@PostMapping("/req_landlord/accept")
+	public ResponseEntity<String> acceptLandlordRequest(@RequestParam("requestId") int requestId,
+			@RequestHeader("Authorization") String authorizationHeader) {
+		if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+			String token = authorizationHeader.substring(7);
+			int userId = jwtGenerator.getUserIdFromJWT(token);
+			try {
+				requestService.acceptLandlordRequest(userId, requestId);
+				return ResponseEntity.ok("Yêu cầu đã được thông qua.");
+			} catch (RuntimeException e) {
+				return ResponseEntity.badRequest().body(e.getMessage());
+			}
+		} else {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		}
+
+	}
 
 	@GetMapping("/requests/list")
 	public ResponseEntity<List<RequestDto>> getAllRequests(@RequestHeader("Authorization") String authorizationHeader) {

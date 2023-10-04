@@ -11,5 +11,5 @@ import com.backend.restapi.models.PropertyRole;
 @Repository
 public interface PropertyRoleRepository extends JpaRepository<PropertyRole, Integer> {
 	boolean existsByTypeName(String typeName);
-	Optional<PropertyRole> findByTypeName(String typeName);
+	PropertyRole findByTypeName(String typeName);
 }

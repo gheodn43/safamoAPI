@@ -2,39 +2,62 @@ package com.backend.restapi.dto;
 
 import java.util.Date;
 
+import com.backend.restapi.models.GPSAddress;
 import com.backend.restapi.models.PropertyRole;
-import com.backend.restapi.models.PropertyStatus;
-import com.backend.restapi.models.UserEntity;
 
 public class PropertyDto {
+	private int id;
 	private String propertyName;
     private String address;
-    private Date registrationDate;
+    private String registrationDate;
     private int unitForRent;
     private String pictureUrl;
-    private PropertyRole propertyRole;
-    private UserEntity owner;
-    private UserProfileUpdateDto user;
-    private PropertyStatus status;
+    private String propertyRole;
+    private String  owner;
+    private String ownerEmail;
+    private String status;
+    private GPSAddress gpsAddress;
     
-	public PropertyStatus getStatus() {
+    
+    
+    public int getId() {
+		return id;
+	}
+	public void setId(int id) {
+		this.id = id;
+	}
+	private int user_id;
+
+	public int getUser_id() {
+		return user_id;
+	}
+	public void setUser_id(int user_id) {
+		this.user_id = user_id;
+	}
+	public GPSAddress getGpsAddress() {
+		return gpsAddress;
+	}
+	public void setGpsAddress(GPSAddress gpsAddress) {
+		this.gpsAddress = gpsAddress;
+	}
+	public String getStatus() {
 		return status;
 	}
-	public void setStatus(PropertyStatus status) {
+	public void setStatus(String status) {
 		this.status = status;
 	}
-	public UserEntity getOwner() {
+	public String getOwner() {
 		return owner;
 	}
-	public void setOwner(UserEntity owner) {
+	public void setOwner(String owner) {
 		this.owner = owner;
 	}
-	
-	public UserProfileUpdateDto getUser() {
-		return user;
+
+	public String getOwnerEmail() {
+		return ownerEmail;
 	}
-	public void setUser(UserProfileUpdateDto user) {
-		this.user = user;
+	public void setOwnerEmail(String ownerEmail) {
+		this.ownerEmail = ownerEmail;
 	}
 	public String getPropertyName() {
 		return propertyName;
@@ -48,10 +71,10 @@ public class PropertyDto {
 	public void setAddress(String address) {
 		this.address = address;
 	}
-	public Date getRegistrationDate() {
+	public String getRegistrationDate() {
 		return registrationDate;
 	}
-	public void setRegistrationDate(Date registrationDate) {
+	public void setRegistrationDate(String registrationDate) {
 		this.registrationDate = registrationDate;
 	}
 	public int getUnitForRent() {
@@ -66,10 +89,10 @@ public class PropertyDto {
 	public void setPictureUrl(String pictureUrl) {
 		this.pictureUrl = pictureUrl;
 	}
-	public PropertyRole getPropertyRole() {
+	public String getPropertyRole() {
 		return propertyRole;
 	}
-	public void setPropertyRole(PropertyRole propertyRole) {
+	public void setPropertyRole(String propertyRole) {
 		this.propertyRole = propertyRole;
 	}
 
