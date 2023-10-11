@@ -26,7 +26,7 @@ public class PropertyRoleController {
                                           @AuthenticationPrincipal UserDetails userDetails) {
         // Kiểm tra xem người dùng có vai trò SUPERADMIN không
         if (userDetails.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals("SUPERADMIN"))) {
+                .anyMatch(auth -> auth.getAuthority().equals("ADMIN"))) {
             if (propertyRoleRepository.existsByTypeName(propertyRole.getTypeName())) {
                 throw new DuplicateRoleException("Property Role with the same name already exists");
             } else {

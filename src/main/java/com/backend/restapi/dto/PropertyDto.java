@@ -7,6 +7,7 @@ import com.backend.restapi.models.PropertyRole;
 
 public class PropertyDto {
 	private int id;
+	private int property_id;
 	private String propertyName;
     private String address;
     private String registrationDate;
@@ -20,7 +21,13 @@ public class PropertyDto {
     
     
     
-    public int getId() {
+    public int getProperty_id() {
+		return property_id;
+	}
+	public void setProperty_id(int property_id) {
+		this.property_id = property_id;
+	}
+	public int getId() {
 		return id;
 	}
 	public void setId(int id) {
