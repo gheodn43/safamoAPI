@@ -1,9 +1,17 @@
 package com.backend.restapi.models;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
 
@@ -21,6 +29,28 @@ public class RoomEntity {
     @Column(name = "description", columnDefinition = "NVARCHAR(255)")
     private String description;
     private int maxQuantity;
+    
+    @ManyToMany
+    @JoinTable(
+        name = "room_entity_roles",
+        joinColumns = @JoinColumn(name = "room_id"),
+        inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private List<RoomRole> roles;
+
+    @ManyToOne
+    @JoinColumn(name = "status_id")
+    private RoomStatus status;
+
+    @OneToMany(mappedBy = "roomEntity", cascade = CascadeType.ALL)
+    private List<RoomPicture> pictures;
+
+    @ManyToOne
+    @JoinColumn(name = "property_id")
+    private PropertyEntity property;
+    
+    
+    
 	public int getId() {
 		return id;
 	}
@@ -57,5 +87,31 @@ public class RoomEntity {
 	public void setMaxQuantity(int maxQuantity) {
 		this.maxQuantity = maxQuantity;
 	}
+	public List<RoomRole> getRoles() {
+		return roles;
+	}
+	public void setRoles(List<RoomRole> roles) {
+		this.roles = roles;
+	}
+	public RoomStatus getStatus() {
+		return status;
+	}
+	public void setStatus(RoomStatus status) {
+		this.status = status;
+	}
+	public List<RoomPicture> getPictures() {
+		return pictures;
+	}
+	public void setPictures(List<RoomPicture> pictures) {
+		this.pictures = pictures;
+	}
+	public PropertyEntity getProperty() {
+		return property;
+	}
+	public void setProperty(PropertyEntity property) {
+		this.property = property;
+	}
+	
+	
     
 }

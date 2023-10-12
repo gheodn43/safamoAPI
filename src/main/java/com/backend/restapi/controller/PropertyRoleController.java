@@ -42,7 +42,7 @@ public class PropertyRoleController {
                                            @AuthenticationPrincipal UserDetails userDetails) {
         // Kiểm tra xem người dùng có vai trò SUPERADMIN không
         if (userDetails.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals("SUPERADMIN"))) {
+                .anyMatch(auth -> auth.getAuthority().equals("ADMIN"))) {
             PropertyRole existingPropertyRole = propertyRoleRepository.findById(id)
                     .orElseThrow(() -> new PropertyRoleNotFoundException("Role not found"));
             existingPropertyRole.setTypeName(updatedPropertyRole.getTypeName());
@@ -60,7 +60,7 @@ public class PropertyRoleController {
     public ResponseEntity<?> deletePropertyRole(@PathVariable Integer id,
                                                 @AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals("SUPERADMIN"))) {
+                .anyMatch(auth -> auth.getAuthority().equals("ADMIN"))) {
             PropertyRole existingPropertyRole = propertyRoleRepository.findById(id)
                     .orElseThrow(() -> new PropertyRoleNotFoundException("Role not found"));
             propertyRoleRepository.delete(existingPropertyRole);

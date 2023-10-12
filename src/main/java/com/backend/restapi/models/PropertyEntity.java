@@ -1,7 +1,9 @@
 package com.backend.restapi.models;
 
 import java.util.Date;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -9,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
@@ -46,6 +49,10 @@ public class PropertyEntity {
 	@ManyToOne
     @JoinColumn(name = "property_type_id")
     private PropertyRole propertyRole;
+	
+	@OneToMany(mappedBy = "property", cascade = CascadeType.ALL)
+    private List<RoomEntity> rooms;
+	
 	
 	public int getPropertyId() {
 		return propertyId;
@@ -122,6 +129,12 @@ public class PropertyEntity {
 	}
 	public void setPropertyRole(PropertyRole propertyRole) {
 		this.propertyRole = propertyRole;
+	}
+	public List<RoomEntity> getRooms() {
+		return rooms;
+	}
+	public void setRooms(List<RoomEntity> rooms) {
+		this.rooms = rooms;
 	}
     
     

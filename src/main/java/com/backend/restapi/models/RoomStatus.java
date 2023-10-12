@@ -9,9 +9,9 @@ import jakarta.persistence.Table;
 import lombok.Data;
 
 @Entity
-@Table(name = "room_roles")
+@Table(name = "room_statuses")
 @Data
-public class RoomRole {
+public class RoomStatus {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -37,4 +37,3 @@ public class RoomRole {
     
     
 }
-
