@@ -1,15 +1,8 @@
 package com.backend.restapi.dto;
 
 public class RoomRoleDto {
-	private int id;
 	private int roomRole_id;
 	private String name;
-	public int getId() {
-		return id;
-	}
-	public void setId(int id) {
-		this.id = id;
-	}
 	public int getRoomRole_id() {
 		return roomRole_id;
 	}

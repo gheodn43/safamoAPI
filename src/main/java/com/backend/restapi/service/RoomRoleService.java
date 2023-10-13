@@ -23,7 +23,6 @@ public class RoomRoleService {
         List<RoomRoleDto> roomRoleDtos = roomRoles.stream()
             .map(roomRole -> {
                 RoomRoleDto dto = new RoomRoleDto();
-                dto.setId(roomRole.getId());
                 dto.setRoomRole_id(roomRole.getId());
                 dto.setName(roomRole.getName());
                 return dto;
@@ -37,7 +36,6 @@ public class RoomRoleService {
         RoomRole roomRole = roomRoleRepository.findById(roomRoleId)
             .orElseThrow(() -> new RoomRoleNotFoundException("Không tìm thấy tag với ID: " + roomRoleId));
         RoomRoleDto roomRoleDto = new RoomRoleDto();
-        roomRoleDto.setId(roomRole.getId());
         roomRoleDto.setRoomRole_id(roomRole.getId());
         roomRoleDto.setName(roomRole.getName());
 
@@ -51,9 +49,7 @@ public class RoomRoleService {
         RoomRole savedRoomRole = roomRoleRepository.save(roomRole);
 
         RoomRoleDto savedRoomRoleDto = new RoomRoleDto();
-        savedRoomRoleDto.setId(savedRoomRole.getId());
         savedRoomRoleDto.setName(savedRoomRole.getName());
-
         return savedRoomRoleDto;
     }
     
@@ -66,7 +62,6 @@ public class RoomRoleService {
         RoomRole updatedRoomRole = roomRoleRepository.save(roomRole);
 
         RoomRoleDto updatedRoomRoleDto = new RoomRoleDto();
-        updatedRoomRoleDto.setId(updatedRoomRole.getId());
         updatedRoomRoleDto.setName(updatedRoomRole.getName());
 
         return updatedRoomRoleDto;

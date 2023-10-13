@@ -18,9 +18,10 @@ public class RoomDto {
     private double acreage;
     private double price;
     private int maxQuantity;
-    private List<RoomRole> tags;
+    private List<Integer> tagIds;
+    private List<String> tags;
     private String status;
-    private List<RoomPicture> pictures;
+    private List<String> picturesURL;
     private BigDecimal[] gpsAddress = new BigDecimal[2];
     
 	public String getAddress() {
@@ -91,11 +92,12 @@ public class RoomDto {
 	public void setMaxQuantity(int maxQuantity) {
 		this.maxQuantity = maxQuantity;
 	}
-	public List<RoomRole> getTags() {
-		return tags;
+	
+	public List<Integer> getTagIds() {
+		return tagIds;
 	}
-	public void setTags(List<RoomRole> tags) {
-		this.tags = tags;
+	public void setTagIds(List<Integer> tagIds) {
+		this.tagIds = tagIds;
 	}
 	public String getStatus() {
 		return status;
@@ -103,11 +105,17 @@ public class RoomDto {
 	public void setStatus(String status) {
 		this.status = status;
 	}
-	public List<RoomPicture> getPictures() {
-		return pictures;
+	public List<String> getPicturesURL() {
+		return picturesURL;
 	}
-	public void setPictures(List<RoomPicture> pictures) {
-		this.pictures = pictures;
+	public void setPicturesURL(List<String> picturesURL) {
+		this.picturesURL = picturesURL;
+	}
+	public List<String> getTags() {
+		return tags;
+	}
+	public void setTags(List<String> tags) {
+		this.tags = tags;
 	}
     
 }

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.backend.restapi.dto.PropertyDto;
 import com.backend.restapi.dto.RoomDto;
+import com.backend.restapi.dto.RoomPictureDto;
 import com.backend.restapi.exception.UnauthorizedException;
 import com.backend.restapi.security.JWTGenerator;
 import com.backend.restapi.service.PropertyService;
@@ -98,6 +99,18 @@ public class RoomController {
 		}
 	}
 
+	@PostMapping("/room/create/add_image/{room_id}")
+	public ResponseEntity<String> addImageIntoRoom(@PathVariable int room_id, @RequestBody List<RoomPictureDto> roomPictureDtos,
+			@RequestHeader("Authorization") String authorizationHeader) {
+		if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+			String token = authorizationHeader.substring(7);
+			int user_id = jwtGenerator.getUserIdFromJWT(token);
+			ResponseEntity<String> response = roomService.addPictureIntoRoomForOwner(roomPictureDtos, room_id, user_id);
+			return response;
+		} else {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		}
+	}
 	@PostMapping("/room/pause_activity/{roomId}")
 	public ResponseEntity<String> pauseActive(@PathVariable int roomId,
 			@RequestHeader("Authorization") String authorizationHeader) {

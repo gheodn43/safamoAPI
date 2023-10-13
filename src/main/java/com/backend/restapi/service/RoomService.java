@@ -1,6 +1,7 @@
 package com.backend.restapi.service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import com.backend.restapi.dto.PropertyDto;
 import com.backend.restapi.dto.RoomDto;
+import com.backend.restapi.dto.RoomPictureDto;
 import com.backend.restapi.dto.RoomRoleDto;
 import com.backend.restapi.exception.CustomException;
 import com.backend.restapi.models.GPSAddress;
@@ -28,6 +30,7 @@ import com.backend.restapi.models.RoomRole;
 import com.backend.restapi.models.RoomStatus;
 import com.backend.restapi.models.UserEntity;
 import com.backend.restapi.repository.PropertyRepository;
+import com.backend.restapi.repository.RoomPictureRepository;
 import com.backend.restapi.repository.RoomRepository;
 import com.backend.restapi.repository.RoomRoleRepository;
 import com.backend.restapi.repository.RoomStatusRepository;
@@ -38,6 +41,7 @@ import com.backend.restapi.repository.propertyStatusRepository;
 public class RoomService {
 	private final RoomRepository roomRepository;
 	private final RoomRoleRepository roomRoleRepository;
+	private final RoomPictureRepository roomPictureRepository;
 	private final RoomStatusRepository roomStatusRepository;
 	private final UserRepository userRepository;
 	private final propertyStatusRepository propStatusRepository;
@@ -45,10 +49,12 @@ public class RoomService {
 
 	@Autowired
 	public RoomService(RoomRepository roomRepository, RoomRoleRepository roomRoleRepository,
-			RoomStatusRepository roomStatusRepository, UserRepository userRepository,
-			propertyStatusRepository propStatusRepository, PropertyRepository propertyRepository) {
+			RoomStatusRepository roomStatusRepository, RoomPictureRepository roomPictureRepository,
+			UserRepository userRepository, propertyStatusRepository propStatusRepository,
+			PropertyRepository propertyRepository) {
 		this.roomRepository = roomRepository;
 		this.roomRoleRepository = roomRoleRepository;
+		this.roomPictureRepository = roomPictureRepository;
 		this.roomStatusRepository = roomStatusRepository;
 		this.userRepository = userRepository;
 		this.propStatusRepository = propStatusRepository;
@@ -69,7 +75,7 @@ public class RoomService {
 			dto.setPrice(roomEntity.getPrice());
 			dto.setMaxQuantity(roomEntity.getMaxQuantity());
 			dto.setStatus(roomEntity.getStatus().getName());
-			dto.setPictures(roomEntity.getPictures());
+//			dto.setPictures(roomEntity.getPictures());
 			BigDecimal[] newGpsAddress = { roomEntity.getProperty().getGpsAddress().getLat(),
 					roomEntity.getProperty().getGpsAddress().getLng() };
 			dto.setGpsAddress(newGpsAddress);
@@ -93,7 +99,7 @@ public class RoomService {
 			roomDto.setPrice(roomEntity.getPrice());
 			roomDto.setMaxQuantity(roomEntity.getMaxQuantity());
 			roomDto.setStatus(roomEntity.getStatus().getName());
-			roomDto.setPictures(roomEntity.getPictures());
+//			roomDto.setPictures(roomEntity.getPictures());
 			BigDecimal[] newGpsAddress = { roomEntity.getProperty().getGpsAddress().getLat(),
 					roomEntity.getProperty().getGpsAddress().getLng() };
 			roomDto.setGpsAddress(newGpsAddress);
@@ -131,7 +137,7 @@ public class RoomService {
 			roomDto.setPrice(roomEntity.getPrice());
 			roomDto.setMaxQuantity(roomEntity.getMaxQuantity());
 			roomDto.setStatus(roomEntity.getStatus().getName());
-			roomDto.setPictures(roomEntity.getPictures());
+//			roomDto.setPictures(roomEntity.getPictures());
 			BigDecimal[] newGpsAddress = { roomEntity.getProperty().getGpsAddress().getLat(),
 					roomEntity.getProperty().getGpsAddress().getLng() };
 			roomDto.setGpsAddress(newGpsAddress);
@@ -144,6 +150,7 @@ public class RoomService {
 	public List<RoomDto> getAllRoomsforGuest() {
 		RoomStatus status = roomStatusRepository.findById(1).orElse(null);
 		List<RoomEntity> roomEntities = roomRepository.findByStatus(status);
+
 		List<RoomDto> roomDtos = roomEntities.stream().map(roomEntity -> {
 			RoomDto dto = new RoomDto();
 			dto.setRoom_id(roomEntity.getId());
@@ -156,21 +163,39 @@ public class RoomService {
 			dto.setPrice(roomEntity.getPrice());
 			dto.setMaxQuantity(roomEntity.getMaxQuantity());
 			dto.setStatus(roomEntity.getStatus().getName());
-			dto.setPictures(roomEntity.getPictures());
 			BigDecimal[] newGpsAddress = { roomEntity.getProperty().getGpsAddress().getLat(),
 					roomEntity.getProperty().getGpsAddress().getLng() };
 			dto.setGpsAddress(newGpsAddress);
+			List<Integer> tagsId = new ArrayList<>();
+			List<String> tagsName = new ArrayList<>();
+			List<String> pictureURLs = new ArrayList<>();
+			List<RoomPicture> roomPictures = roomPictureRepository.findByRoomEntity(roomEntity);
+			List<RoomRole> tags = roomEntity.getRoles();
+			for (RoomRole tag : tags) {
+				int TagId = tag.getId();
+				String TagName = tag.getName();
+				tagsId.add(TagId);
+				tagsName.add(TagName);
+			}
+			for (RoomPicture picture : roomPictures) {
+				String pictureURL = picture.getPictureURL();
+				pictureURLs.add(pictureURL);
+			}
+			dto.setTagIds(tagsId);
+			dto.setTags(tagsName);
+
+			dto.setPicturesURL(pictureURLs);
 			return dto;
 		}).collect(Collectors.toList());
 		return roomDtos;
-	}	
-	
+	}
+
 	public RoomDto getOneforGuest(int roomId) {
 		Optional<RoomEntity> roomOptional = roomRepository.findById(roomId);
 		if (roomOptional.isPresent()) {
 			RoomEntity roomEntity = roomOptional.get();
-			
-			if(roomEntity.getStatus().getId()!=1) {
+
+			if (roomEntity.getStatus().getId() != 1) {
 				return null;
 			}
 			RoomDto roomDto = new RoomDto();
@@ -184,16 +209,16 @@ public class RoomService {
 			roomDto.setPrice(roomEntity.getPrice());
 			roomDto.setMaxQuantity(roomEntity.getMaxQuantity());
 			roomDto.setStatus(roomEntity.getStatus().getName());
-			roomDto.setPictures(roomEntity.getPictures());
+//			roomDto.setPictures(roomEntity.getPictures());
 			BigDecimal[] newGpsAddress = { roomEntity.getProperty().getGpsAddress().getLat(),
 					roomEntity.getProperty().getGpsAddress().getLng() };
-			roomDto.setGpsAddress(newGpsAddress);
+
 			return roomDto;
 		} else {
 			return null;
 		}
 	}
-	
+
 	public ResponseEntity<String> createRoomforPropertyOwner(RoomDto roomDto, int propertyId, int user_id) {
 		Optional<PropertyEntity> propertyOptional = propertyRepository.findById(propertyId);
 		if (propertyOptional.isPresent()) {
@@ -224,6 +249,18 @@ public class RoomService {
 			if (!statusReadyForRent.getStatus_name().equals(currentPropertyStatus.getStatus_name())) {
 				return new ResponseEntity<>("Bất động sản này chưa được cấp phép cho thuê", HttpStatus.BAD_REQUEST);
 			}
+			List<Integer> tagIds = roomDto.getTagIds();
+
+			if (tagIds != null) {
+				List<RoomRole> roomRoles = new ArrayList<>();
+				for (Integer tagId : tagIds) {
+					RoomRole tag = roomRoleRepository.findById(tagId).orElse(null);
+					if (tag != null) {
+						roomRoles.add(tag);
+					}
+				}
+				roomEntity.setRoles(roomRoles);
+			}
 			roomEntity.setRoomName(roomDto.getRoomName());
 			roomEntity.setDescription(roomDto.getDescription());
 			roomEntity.setAcreage(roomDto.getAcreage());
@@ -235,6 +272,30 @@ public class RoomService {
 			return new ResponseEntity<>("room created successfully!", HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>("Không tìm thấy tài sản với ID đã cho.", HttpStatus.NOT_FOUND);
+		}
+	}
+
+	public ResponseEntity<String> addPictureIntoRoomForOwner(List<RoomPictureDto> roomPictureDtos, int roomId,
+			int user_id) {
+		Optional<RoomEntity> roomOptional = roomRepository.findById(roomId);
+		if (roomOptional.isPresent()) {
+			UserEntity ownerInfo = roomOptional.get().getProperty().getOwner();
+			if (user_id == ownerInfo.getUser_id()) {
+				List<RoomPicture> pictures = roomPictureDtos.stream().map(dto -> {
+					RoomPicture picture = new RoomPicture();
+					picture.setPictureURL(dto.getPictureURL());
+					picture.setRoomEntity(roomOptional.get());
+					return picture;
+				}).collect(Collectors.toList());
+
+				roomPictureRepository.saveAll(pictures);
+
+				return new ResponseEntity<>("Ảnh đã được thêm thành công", HttpStatus.OK);
+			} else {
+				throw new CustomException("Bạn không có quyền xóa phòng này.");
+			}
+		} else {
+			return new ResponseEntity<>("Không tìm thấy phòng với ID đã cho", HttpStatus.NOT_FOUND);
 		}
 	}
 
@@ -255,16 +316,12 @@ public class RoomService {
 				throw new CustomException("Bạn không thể truy cập thông tin này.");
 			}
 			RoomEntity room = roomOptional.get();
-			// Kiểm tra xem trạng thái hiện tại của phòng có phải là "Đang hoạt động" (Id:
-			// 1) hay không
 			if (room.getStatus().getId() == 1) {
-				// Lấy trạng thái "Tạm ngừng hoạt động" (Id: 5) từ cơ sở dữ liệu
 				RoomStatus pausedStatus = roomStatusRepository.findById(5).orElse(null);
 				if (pausedStatus == null) {
 					return new ResponseEntity<>("Không tìm thấy trạng thái 'Tạm ngừng hoạt động'",
 							HttpStatus.BAD_REQUEST);
 				}
-				// Cập nhật trạng thái của phòng thành "Tạm ngừng hoạt động"
 				room.setStatus(pausedStatus);
 				roomRepository.save(room);
 				return new ResponseEntity<>("Phòng đã được tạm ngừng hoạt động", HttpStatus.OK);
@@ -354,25 +411,24 @@ public class RoomService {
 	}
 
 	public ResponseEntity<String> deleteRoomForOwner(int roomId, int user_id) {
-	    Optional<RoomEntity> roomOptional = roomRepository.findById(roomId);
-	    if (roomOptional.isPresent()) {
-	        UserEntity ownerInfo = roomOptional.get().getProperty().getOwner();
-	        if (user_id == ownerInfo.getUser_id()) {
-	            roomRepository.delete(roomOptional.get());
-	            return new ResponseEntity<>("Phòng đã được xóa", HttpStatus.OK);
-	        } else {
-	            throw new CustomException("Bạn không có quyền xóa phòng này.");
-	        }
-	    } else {
-	        return new ResponseEntity<>("Không tìm thấy phòng với ID đã cho", HttpStatus.NOT_FOUND);
-	    }
+		Optional<RoomEntity> roomOptional = roomRepository.findById(roomId);
+		if (roomOptional.isPresent()) {
+			UserEntity ownerInfo = roomOptional.get().getProperty().getOwner();
+			if (user_id == ownerInfo.getUser_id()) {
+				roomRepository.delete(roomOptional.get());
+				return new ResponseEntity<>("Phòng đã được xóa", HttpStatus.OK);
+			} else {
+				throw new CustomException("Bạn không có quyền xóa phòng này.");
+			}
+		} else {
+			return new ResponseEntity<>("Không tìm thấy phòng với ID đã cho", HttpStatus.NOT_FOUND);
+		}
 	}
 
-	
 	public static void sortByPropertyIdDescending(List<RoomDto> roomDtos) {
-	    Comparator<RoomDto> idComparator = (roomDtos1, roomDtos2) -> {
-	        return roomDtos2.getId() - roomDtos1.getId();
-	    };
-	    Collections.sort(roomDtos, idComparator);
+		Comparator<RoomDto> idComparator = (roomDtos1, roomDtos2) -> {
+			return roomDtos2.getId() - roomDtos1.getId();
+		};
+		Collections.sort(roomDtos, idComparator);
 	}
 }
