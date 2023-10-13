@@ -98,7 +98,7 @@ public class PropertyController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
     }
-	@GetMapping("/view_all")
+	@GetMapping("/view_all") //cho admin
 	public ResponseEntity<List<PropertyDto>> getAllProperties(@AuthenticationPrincipal UserDetails userDetails) {
 		if (userDetails.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ADMIN"))) {
 			List<PropertyDto> propertyDtos = propertyService.getAllPropertyForAdmin();

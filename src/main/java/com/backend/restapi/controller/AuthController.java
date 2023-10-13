@@ -70,19 +70,13 @@ public class AuthController {
 	            .authenticate(new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword()));
 	    int userId = getUserIdFromDatabaseOrStorage(loginDto.getUsername());
 	    AuthResponseDTO authResponseDTO = new AuthResponseDTO();
-
-	    // Tạo một đối tượng JwtPayloadCustom và đặt các thông tin từ authentication vào đó
 	    JwtPayloadCustom payloadCustom = new JwtPayloadCustom();
 	    payloadCustom.setUserId(userId);
 	    payloadCustom.setUsername(loginDto.getUsername());
 	    List<String> roles = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority)
 	            .collect(Collectors.toList());
 	    payloadCustom.setRoles(roles);
-
 	    SecurityContextHolder.getContext().setAuthentication(authentication);
-
-	    // Sử dụng JwtPayloadCustom để tạo JWT
-	    
 	    authResponseDTO.setUsername(loginDto.getUsername());
 	    authResponseDTO.setRoles(roles);
 	    String token = jwtGenerator.generateToken(payloadCustom);

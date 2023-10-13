@@ -1,5 +1,6 @@
 package com.backend.restapi.dto;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.backend.restapi.models.RoomPicture;
@@ -12,13 +13,30 @@ public class RoomDto {
 	private int property_id;
     private String roomName;
     private String propertyName;
+    private String address;
     private String description;
     private double acreage;
     private double price;
     private int maxQuantity;
     private List<RoomRole> tags;
-    private RoomStatus status;
+    private String status;
     private List<RoomPicture> pictures;
+    private BigDecimal[] gpsAddress = new BigDecimal[2];
+    
+	public String getAddress() {
+		return address;
+	}
+	public void setAddress(String address) {
+		this.address = address;
+	}
+	
+	
+	public BigDecimal[] getGpsAddress() {
+		return gpsAddress;
+	}
+	public void setGpsAddress(BigDecimal[] gpsAddress) {
+		this.gpsAddress = gpsAddress;
+	}
 	public int getId() {
 		return id;
 	}
@@ -79,10 +97,10 @@ public class RoomDto {
 	public void setTags(List<RoomRole> tags) {
 		this.tags = tags;
 	}
-	public RoomStatus getStatus() {
+	public String getStatus() {
 		return status;
 	}
-	public void setStatus(RoomStatus status) {
+	public void setStatus(String status) {
 		this.status = status;
 	}
 	public List<RoomPicture> getPictures() {
