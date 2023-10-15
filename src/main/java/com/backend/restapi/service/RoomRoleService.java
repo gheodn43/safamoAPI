@@ -53,6 +53,20 @@ public class RoomRoleService {
         return savedRoomRoleDto;
     }
     
+    public List<RoomRoleDto> getRoomRolesByIdList(List<Integer> idList) {
+        List<RoomRole> roomRoles = roomRoleRepository.findAllById(idList);
+        List<RoomRoleDto> roomRoleDtos = roomRoles.stream()
+            .map(roomRole -> {
+                RoomRoleDto dto = new RoomRoleDto();
+                dto.setRoomRole_id(roomRole.getId());
+                dto.setName(roomRole.getName());
+                return dto;
+            })
+            .collect(Collectors.toList());
+
+        return roomRoleDtos;
+    }
+
     public RoomRoleDto updateRoomRole(Integer roomRoleId, RoomRoleDto roomRoleDto) {
         RoomRole roomRole = roomRoleRepository.findById(roomRoleId)
             .orElseThrow(() -> new RoomRoleNotFoundException("Không tìm thấy vai trò phòng với ID: " + roomRoleId));

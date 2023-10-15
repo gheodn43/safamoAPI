@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import com.backend.restapi.dto.PropertyDto;
 import com.backend.restapi.dto.RoomDto;
 import com.backend.restapi.dto.RoomPictureDto;
+import com.backend.restapi.dto.RoomPrivateOutputDto;
 import com.backend.restapi.dto.RoomRoleDto;
 import com.backend.restapi.exception.CustomException;
 import com.backend.restapi.models.GPSAddress;
@@ -75,10 +76,7 @@ public class RoomService {
 			dto.setPrice(roomEntity.getPrice());
 			dto.setMaxQuantity(roomEntity.getMaxQuantity());
 			dto.setStatus(roomEntity.getStatus().getName());
-//			dto.setPictures(roomEntity.getPictures());
-			BigDecimal[] newGpsAddress = { roomEntity.getProperty().getGpsAddress().getLat(),
-					roomEntity.getProperty().getGpsAddress().getLng() };
-			dto.setGpsAddress(newGpsAddress);
+			dto.setGpsAddress(roomEntity.getProperty().getGpsAddress());
 			return dto;
 		}).collect(Collectors.toList());
 		return roomDtos;
@@ -99,16 +97,49 @@ public class RoomService {
 			roomDto.setPrice(roomEntity.getPrice());
 			roomDto.setMaxQuantity(roomEntity.getMaxQuantity());
 			roomDto.setStatus(roomEntity.getStatus().getName());
-//			roomDto.setPictures(roomEntity.getPictures());
-			BigDecimal[] newGpsAddress = { roomEntity.getProperty().getGpsAddress().getLat(),
-					roomEntity.getProperty().getGpsAddress().getLng() };
-			roomDto.setGpsAddress(newGpsAddress);
+			roomDto.setGpsAddress(roomEntity.getProperty().getGpsAddress());
 			return roomDto;
 		} else {
 			return null;
 		}
 	}
 
+	public List<RoomPrivateOutputDto> getAllForOwner(int propertyId) {
+		Optional<PropertyEntity> propertyOptional = propertyRepository.findById(propertyId);
+	    if (propertyOptional.isEmpty()) {
+	        return new ArrayList<>();
+	    }
+	    PropertyEntity property = propertyOptional.get();
+	    List<RoomEntity> rooms = roomRepository.findByProperty(property);
+	    List<RoomPrivateOutputDto> roomDtos = rooms.stream()
+		        .map(room -> {
+		        	RoomPrivateOutputDto roomInfo = new RoomPrivateOutputDto();
+		        	roomInfo.setRoom_id(room.getId());
+		        	roomInfo.setRoomName(room.getRoomName());
+		        	roomInfo.setProperty_id(property.getPropertyId());
+		        	roomInfo.setPropertyName(property.getPropertyName());
+		        	roomInfo.setPrice(room.getPrice());
+		        	roomInfo.setStatus(room.getStatus().getName());
+					List<String> tagsName = new ArrayList<>();
+					List<String> pictureURLs = new ArrayList<>();
+					List<RoomPicture> roomPictures = roomPictureRepository.findByRoomEntity(room);
+					List<RoomRole> tags = room.getRoles();
+					for (RoomRole tag : tags) {
+						String TagName = tag.getName();
+						tagsName.add(TagName);
+					}
+					for (RoomPicture picture : roomPictures) {
+						String pictureURL = picture.getPictureURL();
+						pictureURLs.add(pictureURL);
+					}
+					roomInfo.setPicturesURL(pictureURLs);
+					roomInfo.setTags(tagsName);
+		            return roomInfo;
+		        })
+		        .collect(Collectors.toList());
+		    return roomDtos;
+	}
+	
 	public RoomDto getOneforPropertyOwner(int roomId, int user_id) {
 		Optional<RoomEntity> roomOptional = roomRepository.findById(roomId);
 		if (roomOptional.isPresent()) {
@@ -137,10 +168,7 @@ public class RoomService {
 			roomDto.setPrice(roomEntity.getPrice());
 			roomDto.setMaxQuantity(roomEntity.getMaxQuantity());
 			roomDto.setStatus(roomEntity.getStatus().getName());
-//			roomDto.setPictures(roomEntity.getPictures());
-			BigDecimal[] newGpsAddress = { roomEntity.getProperty().getGpsAddress().getLat(),
-					roomEntity.getProperty().getGpsAddress().getLng() };
-			roomDto.setGpsAddress(newGpsAddress);
+			roomDto.setGpsAddress(roomEntity.getProperty().getGpsAddress());
 			return roomDto;
 		} else {
 			return null;
@@ -163,9 +191,7 @@ public class RoomService {
 			dto.setPrice(roomEntity.getPrice());
 			dto.setMaxQuantity(roomEntity.getMaxQuantity());
 			dto.setStatus(roomEntity.getStatus().getName());
-			BigDecimal[] newGpsAddress = { roomEntity.getProperty().getGpsAddress().getLat(),
-					roomEntity.getProperty().getGpsAddress().getLng() };
-			dto.setGpsAddress(newGpsAddress);
+			dto.setGpsAddress(roomEntity.getProperty().getGpsAddress());
 			List<Integer> tagsId = new ArrayList<>();
 			List<String> tagsName = new ArrayList<>();
 			List<String> pictureURLs = new ArrayList<>();
@@ -183,7 +209,6 @@ public class RoomService {
 			}
 			dto.setTagIds(tagsId);
 			dto.setTags(tagsName);
-
 			dto.setPicturesURL(pictureURLs);
 			return dto;
 		}).collect(Collectors.toList());
@@ -209,10 +234,25 @@ public class RoomService {
 			roomDto.setPrice(roomEntity.getPrice());
 			roomDto.setMaxQuantity(roomEntity.getMaxQuantity());
 			roomDto.setStatus(roomEntity.getStatus().getName());
-//			roomDto.setPictures(roomEntity.getPictures());
-			BigDecimal[] newGpsAddress = { roomEntity.getProperty().getGpsAddress().getLat(),
-					roomEntity.getProperty().getGpsAddress().getLng() };
-
+			roomDto.setGpsAddress(roomEntity.getProperty().getGpsAddress());
+			List<Integer> tagsId = new ArrayList<>();
+			List<String> tagsName = new ArrayList<>();
+			List<String> pictureURLs = new ArrayList<>();
+			List<RoomPicture> roomPictures = roomPictureRepository.findByRoomEntity(roomEntity);
+			List<RoomRole> tags = roomEntity.getRoles();
+			for (RoomRole tag : tags) {
+				int TagId = tag.getId();
+				String TagName = tag.getName();
+				tagsId.add(TagId);
+				tagsName.add(TagName);
+			}
+			for (RoomPicture picture : roomPictures) {
+				String pictureURL = picture.getPictureURL();
+				pictureURLs.add(pictureURL);
+			}
+			roomDto.setPicturesURL(pictureURLs);
+			roomDto.setTags(tagsName);
+			roomDto.setPicturesURL(pictureURLs);
 			return roomDto;
 		} else {
 			return null;

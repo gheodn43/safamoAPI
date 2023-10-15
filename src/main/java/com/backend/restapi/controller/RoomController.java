@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.backend.restapi.dto.PropertyDto;
 import com.backend.restapi.dto.RoomDto;
 import com.backend.restapi.dto.RoomPictureDto;
+import com.backend.restapi.dto.RoomPrivateOutputDto;
 import com.backend.restapi.exception.UnauthorizedException;
 import com.backend.restapi.security.JWTGenerator;
 import com.backend.restapi.service.PropertyService;
@@ -61,6 +62,13 @@ public class RoomController {
 		}
 	}
 
+	@GetMapping("/my_room/get_all/{property_id}") // cho owner
+	public ResponseEntity<List<RoomPrivateOutputDto>> getALlRoomOwner(@PathVariable int property_id) {
+		List<RoomPrivateOutputDto> RoomDtos = roomService.getAllForOwner(property_id);
+		return ResponseEntity.ok(RoomDtos);
+
+	}
+
 	@GetMapping("/my_room/view_detail/{room_id}") // cho owner
 	public ResponseEntity<RoomDto> getOneRoomOwner(@PathVariable int room_id,
 			@RequestHeader("Authorization") String authorizationHeader) {
@@ -100,7 +108,8 @@ public class RoomController {
 	}
 
 	@PostMapping("/room/create/add_image/{room_id}")
-	public ResponseEntity<String> addImageIntoRoom(@PathVariable int room_id, @RequestBody List<RoomPictureDto> roomPictureDtos,
+	public ResponseEntity<String> addImageIntoRoom(@PathVariable int room_id,
+			@RequestBody List<RoomPictureDto> roomPictureDtos,
 			@RequestHeader("Authorization") String authorizationHeader) {
 		if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
 			String token = authorizationHeader.substring(7);
@@ -111,6 +120,7 @@ public class RoomController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
 	}
+
 	@PostMapping("/room/pause_activity/{roomId}")
 	public ResponseEntity<String> pauseActive(@PathVariable int roomId,
 			@RequestHeader("Authorization") String authorizationHeader) {
@@ -157,7 +167,7 @@ public class RoomController {
 			throw new UnauthorizedException("Access denied");
 		}
 	}
-	
+
 	@DeleteMapping("/my_room/delete/{roomId}")
 	public ResponseEntity<String> deleteRoom(@PathVariable int roomId,
 			@RequestHeader("Authorization") String authorizationHeader) {

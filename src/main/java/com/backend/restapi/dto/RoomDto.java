@@ -3,6 +3,7 @@ package com.backend.restapi.dto;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.backend.restapi.models.GPSAddress;
 import com.backend.restapi.models.RoomPicture;
 import com.backend.restapi.models.RoomRole;
 import com.backend.restapi.models.RoomStatus;
@@ -22,7 +23,7 @@ public class RoomDto {
     private List<String> tags;
     private String status;
     private List<String> picturesURL;
-    private BigDecimal[] gpsAddress = new BigDecimal[2];
+    private GPSAddress gpsAddress;
     
 	public String getAddress() {
 		return address;
@@ -32,10 +33,10 @@ public class RoomDto {
 	}
 	
 	
-	public BigDecimal[] getGpsAddress() {
+	public GPSAddress getGpsAddress() {
 		return gpsAddress;
 	}
-	public void setGpsAddress(BigDecimal[] gpsAddress) {
+	public void setGpsAddress(GPSAddress gpsAddress) {
 		this.gpsAddress = gpsAddress;
 	}
 	public int getId() {

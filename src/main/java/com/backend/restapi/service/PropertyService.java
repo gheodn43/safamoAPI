@@ -137,6 +137,7 @@ public class PropertyService {
 					throw new CustomException("Bạn không thể truy cập thông tin tài sản này.");
 				}
 			}
+			propertyInfo.setProperty_id(propertyId);
 			propertyInfo.setPropertyName(property.getPropertyName());
 			propertyInfo.setAddress(property.getAddress());
 			propertyInfo.setRegistrationDate(property.getRegistrationDate().toString());
@@ -229,6 +230,7 @@ public class PropertyService {
 	        .map(property -> {
 	            PropertyDto propertyInfo = new PropertyDto();
 	            propertyInfo.setId(property.getPropertyId());
+	            propertyInfo.setProperty_id(property.getPropertyId());
 	            propertyInfo.setPropertyName(property.getPropertyName());
 	            propertyInfo.setAddress(property.getAddress());
 	            propertyInfo.setRegistrationDate(property.getRegistrationDate().toString());

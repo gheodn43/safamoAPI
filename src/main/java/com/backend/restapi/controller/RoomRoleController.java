@@ -42,6 +42,11 @@ public class RoomRoleController {
 	public List<RoomRoleDto> viewRoomRoles() {
 		return roomRoleService.getAll();
 	}
+	
+	@PostMapping("/auth/room_tag/view_all_selected")
+	public List<RoomRoleDto> viewAllSelected(@RequestBody List<Integer> roomRoleIds) {
+		return roomRoleService.getRoomRolesByIdList(roomRoleIds);
+	}
 
 	@GetMapping("auth/room_tag/{roomRoleId}")
 	public ResponseEntity<RoomRoleDto> getRoomRole(@PathVariable Integer roomRoleId,
