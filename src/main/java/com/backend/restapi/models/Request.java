@@ -36,6 +36,10 @@ public class Request {
     @JoinColumn(name = "user_id")
     private UserEntity user;
     
+    @ManyToOne
+    @JoinColumn(name = "room_id")
+    private RoomEntity room; 
+    
     
 	public UserEntity getUser() {
 		return user;
@@ -83,6 +87,14 @@ public class Request {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public RoomEntity getRoom() {
+		return room;
+	}
+
+	public void setRoom(RoomEntity room) {
+		this.room = room;
 	}
     
     

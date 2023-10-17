@@ -49,7 +49,8 @@ public class RoomEntity {
     @JoinColumn(name = "property_id")
     private PropertyEntity property;
     
-    
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
+    private List<Request> requests;
     
 	public int getId() {
 		return id;
@@ -110,6 +111,12 @@ public class RoomEntity {
 	}
 	public void setProperty(PropertyEntity property) {
 		this.property = property;
+	}
+	public List<Request> getRequests() {
+		return requests;
+	}
+	public void setRequests(List<Request> requests) {
+		this.requests = requests;
 	}
 	
 	

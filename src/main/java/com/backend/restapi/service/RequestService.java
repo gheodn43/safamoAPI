@@ -12,14 +12,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.backend.restapi.dto.RentalRequestDto;
 import com.backend.restapi.dto.RequestDto;
+import com.backend.restapi.models.PropertyEntity;
 import com.backend.restapi.models.Request;
 import com.backend.restapi.models.RequestRole;
 import com.backend.restapi.models.RequestStatus;
+import com.backend.restapi.models.RoomEntity;
 import com.backend.restapi.models.UserEntity;
+import com.backend.restapi.repository.PropertyRepository;
 import com.backend.restapi.repository.RequestRepository;
 import com.backend.restapi.repository.RequestRoleRepository;
 import com.backend.restapi.repository.RequestStatusRepository;
+import com.backend.restapi.repository.RoomRepository;
 import com.backend.restapi.repository.UserRepository;
 
 @Service
@@ -28,18 +33,22 @@ public class RequestService {
 	private final RequestRoleRepository requestRoleRepository;
 	private final RequestStatusRepository requestStatusRepository;
 	private final UserRepository userRepository;
-
     private final RequestRateLimiterService rateLimiterService;
+    private final RoomRepository roomRepository;
+    private final PropertyRepository propertyRepository;
 
 	@Autowired
 	public RequestService(RequestRepository requestRepository, RequestRoleRepository requestRoleRepository,
 			RequestStatusRepository requestStatusRepository, UserRepository userRepository,
-			RequestRateLimiterService rateLimiterService) {
+			RequestRateLimiterService rateLimiterService, RoomRepository roomRepository,
+			PropertyRepository propertyRepository) {
 		this.requestRepository = requestRepository;
 		this.requestRoleRepository = requestRoleRepository;
 		this.requestStatusRepository = requestStatusRepository;
 		this.userRepository = userRepository;
 		this.rateLimiterService = rateLimiterService;
+		this.roomRepository = roomRepository;
+		this.propertyRepository = propertyRepository;
 	}
 
 	@Transactional
@@ -69,6 +78,30 @@ public class RequestService {
 			throw new RuntimeException("Không tìm thấy dữ liệu tương ứng.");
 		}
 	}
+	
+	@Transactional      // y/c thuê
+	public void createRentalRequestForCustomer(int userId, int roomId) {
+		RequestRole requestRole = requestRoleRepository.findById(2).orElse(null);
+		RequestStatus requestStatus = requestStatusRepository.findById(1).orElse(null);
+		RoomEntity room = roomRepository.findById(roomId).orElse(null);
+		UserEntity user = userRepository.findById(userId).orElse(null);
+		// 2 request phải cách nhau 24h
+		rateLimiterService.checkRateLimit(userId, 24);
+		if (requestRole != null && requestStatus != null && user != null) {
+			
+				Request rentalRequest = new Request();
+				String timeStamp = setCreatedAtNow();
+				rentalRequest.setUser(user);
+				rentalRequest.setRequestRole(requestRole);
+				rentalRequest.setRequestStatus(requestStatus);
+				rentalRequest.setDescription("Thuê phòng " + room.getRoomName() + "-" + room.getProperty().getPropertyName());
+				rentalRequest.setTimeStamp(timeStamp);
+				rentalRequest.setRoom(room);
+				requestRepository.save(rentalRequest);	
+		} else {
+			throw new RuntimeException("Không tìm thấy dữ liệu tương ứng.");
+		}
+	}
 
 	@Transactional
 	public void rejectLandlordRequest(int userId, int requestId) {
@@ -91,6 +124,22 @@ public class RequestService {
 	    } else {
 	        throw new RuntimeException("Chỉ người dùng có vai trò ADMIN mới có quyền từ chối yêu cầu.");
 	    }
+	}
+	
+	@Transactional
+	public void rejectRentalRequest(int requestId) {
+	    RequestStatus rejectedStatus = requestStatusRepository.findById(2).orElse(null);
+	    Request requestToReject = requestRepository.findById(requestId).orElse(null);
+	        if (requestToReject != null) {
+	            if (rejectedStatus != null) {
+	                requestToReject.setRequestStatus(rejectedStatus);
+	                requestRepository.save(requestToReject);
+	            } else {
+	                throw new RuntimeException("Trạng thái 'Từ chối' không tồn tại.");
+	            }
+	        } else {
+	            throw new RuntimeException("Yêu cầu không tồn tại.");
+	        }
 	}
 
 	@Transactional
@@ -119,6 +168,26 @@ public class RequestService {
 	        throw new RuntimeException("Chỉ người dùng có vai trò ADMIN mới có quyền chấp nhận yêu cầu.");
 	    }
 	}
+	
+	@Transactional
+	public void acceptRentalRequest(int requestId) {
+	    RequestStatus acceptedStatus = requestStatusRepository.findById(3).orElse(null); 
+	    Request requestToAccept = requestRepository.findById(requestId).orElse(null);
+	        if (requestToAccept != null) {
+	            if (acceptedStatus != null) {
+	                if ("Chờ xử lý".equals(requestToAccept.getRequestStatus().getName())) {
+	                    requestToAccept.setRequestStatus(acceptedStatus);
+	                    requestRepository.save(requestToAccept);
+	                } else {
+	                    throw new RuntimeException("Không thể chấp nhận yêu cầu với trạng thái hiện tại.");
+	                }
+	            } else {
+	                throw new RuntimeException("Trạng thái 'Đã được chấp nhận' không tồn tại.");
+	            }
+	        } else {
+	            throw new RuntimeException("Yêu cầu không tồn tại.");
+	        }
+	}
 
 	
 	@Transactional
@@ -130,24 +199,97 @@ public class RequestService {
 	        RequestDto requestDto = new RequestDto();
 	        requestDto.setId(request.getId());
 	        requestDto.setRequestRole(request.getRequestRole().getName());
-
-	        // Map request status to desired display value
 	        String requestStatus = mapRequestStatus(request.getRequestStatus().getName());
 	        requestDto.setRequestStatus(requestStatus);
-
 	        requestDto.setDescription(request.getDescription());
 	        requestDto.setUsername(request.getUser().getUsername());
 	        requestDto.setUser_id(request.getUser().getUser_id());
 	        requestDto.setTimeStamp(request.getTimeStamp());
-
 	        requestDtos.add(requestDto);
 	    }
-
 	    return requestDtos;
 	}
 
 
+	@Transactional
+	public List<RentalRequestDto> getAllRentalRequestForPropertyOwner(int owner_id) {
+		UserEntity owner = userRepository.findById(owner_id).orElse(null);
+		List<PropertyEntity> properties = propertyRepository.findByOwner(owner);
+	    List<RentalRequestDto> requestDtos = new ArrayList<>();
+	    for (PropertyEntity property : properties) {
+            List<RoomEntity> rooms = property.getRooms();
+            for (RoomEntity room : rooms) {
+                List<Request> roomRequests = room.getRequests();
+                for (Request request : roomRequests) {
+        	    	RentalRequestDto requestDto = new RentalRequestDto();
+        	        requestDto.setId(request.getId());
+        	        requestDto.setUser_id(request.getUser().getUser_id());
+        	        requestDto.setRoom_id(request.getRoom().getId());
+        	        requestDto.setUsername(request.getUser().getUsername());
+        	        requestDto.setDescription(request.getDescription());
+        	        String requestStatus = mapRequestStatus(request.getRequestStatus().getName());
+        	        requestDto.setRequestStatus(requestStatus);
+        	        requestDto.setTimeStamp(request.getTimeStamp());
+        	        requestDtos.add(requestDto);
+        	    }
+            }
+        }
+	    sortByTimestampDescendingFDTO(requestDtos);
+	    return requestDtos;
+	}
 	
+	@Transactional
+	public List<RentalRequestDto> getAllRentalRequestForRoom(int room_id, int user_id) {
+		RoomEntity room = roomRepository.findById(room_id).orElse(null);
+		UserEntity adminUser = userRepository.findById(user_id).orElse(null);
+		boolean isAdmin = adminUser.getRoles().stream().anyMatch(role -> role.getName().equals("ADMIN"));
+		int owner_id = room.getProperty().getOwner().getUser_id();
+		if (owner_id != user_id && !isAdmin) {
+			return new ArrayList<>();
+		}
+		List<Request> roomRequests = room.getRequests();
+		sortByTimestampDescending(roomRequests);
+		List<RentalRequestDto> requestDtos = new ArrayList<>();
+		for (Request request : roomRequests) {
+			RentalRequestDto requestDto = new RentalRequestDto();
+			requestDto.setId(request.getId());
+			requestDto.setUser_id(request.getUser().getUser_id());
+			requestDto.setRoom_id(request.getRoom().getId());
+			requestDto.setUsername(request.getUser().getUsername());
+			requestDto.setDescription(request.getDescription());
+			String requestStatus = mapRequestStatus(request.getRequestStatus().getName());
+			requestDto.setRequestStatus(requestStatus);
+			requestDto.setTimeStamp(request.getTimeStamp());
+			requestDtos.add(requestDto);
+		}
+		return requestDtos;
+	}
+	
+	@Transactional
+	public List<RentalRequestDto> getAllRequestForSender(int user_id) {
+		UserEntity sender = userRepository.findById(user_id).orElse(null);
+		List<Request> roomRequests = requestRepository.findByUser(sender);
+		sortByTimestampDescending(roomRequests);
+		List<RentalRequestDto> requestDtos = new ArrayList<>();
+		for (Request request : roomRequests) {
+			RentalRequestDto requestDto = new RentalRequestDto();
+			if(request.getRequestRole().getId() == 1) {
+				requestDto.setRoom_id(0);
+			}else {
+				requestDto.setRoom_id(request.getRoom().getId());
+			}
+			requestDto.setId(request.getId());
+			requestDto.setUser_id(request.getUser().getUser_id());
+			requestDto.setUsername(request.getUser().getUsername());
+			requestDto.setDescription(request.getDescription());
+			String requestStatus = mapRequestStatus(request.getRequestStatus().getName());
+			requestDto.setRequestStatus(requestStatus);
+			requestDto.setTimeStamp(request.getTimeStamp());
+			requestDtos.add(requestDto);
+		}
+		return requestDtos;
+	}
+
     @Transactional
     public void cancelRequest(int userId, int requestId) {
         UserEntity user = userRepository.findById(userId).orElse(null);
@@ -205,13 +347,26 @@ public class RequestService {
             try {
                 Date date1 = dateFormat.parse(request1.getTimeStamp());
                 Date date2 = dateFormat.parse(request2.getTimeStamp());
-                return date2.compareTo(date1); // Compare in descending order
+                return date2.compareTo(date1);
             } catch (ParseException e) {
                 e.printStackTrace();
                 return 0;
             }
         };
-
+        Collections.sort(requests, timestampComparator);
+    }
+	public static void sortByTimestampDescendingFDTO(List<RentalRequestDto> requests) {
+        Comparator<RentalRequestDto> timestampComparator = (request1, request2) -> {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+            try {
+                Date date1 = dateFormat.parse(request1.getTimeStamp());
+                Date date2 = dateFormat.parse(request2.getTimeStamp());
+                return date2.compareTo(date1);
+            } catch (ParseException e) {
+                e.printStackTrace();
+                return 0;
+            }
+        };
         Collections.sort(requests, timestampComparator);
     }
 }
