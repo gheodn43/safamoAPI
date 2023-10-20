@@ -54,9 +54,9 @@ public class RentalManageController {
 		}
 	}
 
-	@PostMapping("/req_rental/{user_id}/{room_id}")
-	public ResponseEntity<String> createRentalRequest(@PathVariable("user_id") int userId,
-			@PathVariable("room_id") int roomId) {
+	@PostMapping("/req_rental/send")
+	public ResponseEntity<String> createRentalRequest(@RequestParam("user_id") int userId,
+			@RequestParam("room_id") int roomId) {
 		try {
 			requestService.createRentalRequestForCustomer(userId, roomId);
 			return ResponseEntity.ok("Yêu cầu thuê đã được gửi thành công!");

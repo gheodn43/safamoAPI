@@ -4,6 +4,7 @@ public class RentalRequestDto {
 	int id;
 	int user_id;
 	int room_id;
+	String requestRole;
 	String username;
 	String description;
 	String requestStatus;
@@ -50,5 +51,12 @@ public class RentalRequestDto {
 	public void setTimeStamp(String timeStamp) {
 		this.timeStamp = timeStamp;
 	}
+	public String getRequestRole() {
+		return requestRole;
+	}
+	public void setRequestRole(String requestRole) {
+		this.requestRole = requestRole;
+	}
+	
 	
 }

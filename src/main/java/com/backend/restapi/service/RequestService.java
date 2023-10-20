@@ -252,15 +252,18 @@ public class RequestService {
 		List<RentalRequestDto> requestDtos = new ArrayList<>();
 		for (Request request : roomRequests) {
 			RentalRequestDto requestDto = new RentalRequestDto();
-			requestDto.setId(request.getId());
-			requestDto.setUser_id(request.getUser().getUser_id());
-			requestDto.setRoom_id(request.getRoom().getId());
-			requestDto.setUsername(request.getUser().getUsername());
-			requestDto.setDescription(request.getDescription());
-			String requestStatus = mapRequestStatus(request.getRequestStatus().getName());
-			requestDto.setRequestStatus(requestStatus);
-			requestDto.setTimeStamp(request.getTimeStamp());
-			requestDtos.add(requestDto);
+			if(request.getRequestStatus().getId() == 1) {
+				requestDto.setId(request.getId());
+				requestDto.setUser_id(request.getUser().getUser_id());
+				requestDto.setRoom_id(request.getRoom().getId());
+				requestDto.setUsername(request.getUser().getUsername());
+				requestDto.setDescription(request.getDescription());
+				String requestStatus = mapRequestStatus(request.getRequestStatus().getName());
+				requestDto.setRequestStatus(requestStatus);
+				requestDto.setTimeStamp(request.getTimeStamp());
+				requestDtos.add(requestDto);
+			}
+			
 		}
 		return requestDtos;
 	}
@@ -285,7 +288,9 @@ public class RequestService {
 			String requestStatus = mapRequestStatus(request.getRequestStatus().getName());
 			requestDto.setRequestStatus(requestStatus);
 			requestDto.setTimeStamp(request.getTimeStamp());
+			requestDto.setRequestRole(request.getRequestRole().getName());
 			requestDtos.add(requestDto);
+			
 		}
 		return requestDtos;
 	}
