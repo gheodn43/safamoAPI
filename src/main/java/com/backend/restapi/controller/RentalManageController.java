@@ -6,6 +6,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,20 +23,23 @@ import com.backend.restapi.dto.UserProfileUpdateDto;
 import com.backend.restapi.dto.RequestDto;
 import com.backend.restapi.security.JWTGenerator;
 import com.backend.restapi.service.AuthorizationService;
+import com.backend.restapi.service.EmailService;
 import com.backend.restapi.service.RequestService;
 
 @RestController
 @RequestMapping("/api/rental_manage")
 public class RentalManageController {
 	@Autowired
+	private final EmailService emailService;
 	private final RequestService requestService;
 	private final AuthorizationService authorizationService;
 	private final LandlordRequestDTO landlordRequestDTO;
 	private JWTGenerator jwtGenerator;
 
 	@Autowired
-	public RentalManageController(RequestService requestService, LandlordRequestDTO landlordRequestDTO,
+	public RentalManageController(EmailService emailService,RequestService requestService, LandlordRequestDTO landlordRequestDTO,
 			JWTGenerator jwtGenerator, AuthorizationService authorizationService) {
+		this.emailService = emailService;
 		this.requestService = requestService;
 		this.landlordRequestDTO = landlordRequestDTO;
 		this.jwtGenerator = jwtGenerator;
@@ -56,9 +61,9 @@ public class RentalManageController {
 
 	@PostMapping("/req_rental/send")
 	public ResponseEntity<String> createRentalRequest(@RequestParam("user_id") int userId,
-			@RequestParam("room_id") int roomId) {
+			@RequestParam("room_id") int roomId, @RequestParam("duarationTime") String duarationTime) {
 		try {
-			requestService.createRentalRequestForCustomer(userId, roomId);
+			requestService.createRentalRequestForCustomer(userId, roomId, duarationTime);
 			return ResponseEntity.ok("Yêu cầu thuê đã được gửi thành công!");
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Lỗi: " + e.getMessage());
@@ -139,9 +144,9 @@ public class RentalManageController {
 	}
 
 	@PostMapping("/req_rental/accept")
-	public ResponseEntity<String> acceptRentalRequest(@RequestParam("requestId") int requestId) {
+	public ResponseEntity<String> acceptRentalRequest(@RequestParam("requestId") int requestId, @RequestBody String contractLink) {
 		try {
-			requestService.acceptRentalRequest(requestId);
+			requestService.acceptRentalRequest(requestId, contractLink);
 			return ResponseEntity.ok("Yêu cầu đã được thông qua.");
 		} catch (RuntimeException e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
@@ -175,5 +180,30 @@ public class RentalManageController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
 	}
-
+	@GetMapping("/view")
+	public ResponseEntity<RentalRequestDto> viewRequest(@AuthenticationPrincipal UserDetails userDetails,
+			@RequestParam("requestId") int requestId) {
+		if (userDetails.getAuthorities().stream()
+				.anyMatch(auth -> auth.getAuthority().equals("ADMIN") || auth.getAuthority().equals("LANDLORD"))) {
+			RentalRequestDto rentalRequest = requestService.getOneRentalReuqest(requestId);
+			return ResponseEntity.ok(rentalRequest);
+		} else {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		}
+	}
+	
+	@PostMapping("/req_rentals/delete")
+	public ResponseEntity<String> deleteRentalRequestBySender(
+			@RequestHeader("Authorization") String authorizationHeader,
+			@RequestParam("roomId") int roomId
+			) {
+		if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+			String token = authorizationHeader.substring(7);
+			int userId = jwtGenerator.getUserIdFromJWT(token);
+			requestService.DeleteRequestWithRoom(roomId, userId);
+			return ResponseEntity.ok("Đã xóa yêu cầu thành công!");
+		} else {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		}
+	}
 }

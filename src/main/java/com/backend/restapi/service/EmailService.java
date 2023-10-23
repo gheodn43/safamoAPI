@@ -45,5 +45,19 @@ public class EmailService {
         message.setText(text);
         javaMailSender.send(message);
     }
+    
+    public void sendRoomBookingAcceptedEmail(String recipientUserName, String recipientEmail, String contractLink) {
+        String subject = "Yêu cầu thuê phòng đã được chấp nhận";
+        String text = "Xin chào, " + recipientUserName + "\n\n"
+                + "Yêu cầu thuê phòng của bạn đã được chấp nhận. Bấm vào liên kết dưới đây để xem hợp đồng:\n"
+                + contractLink ;
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(recipientEmail);
+        message.setSubject(subject);
+        message.setText(text);
+        javaMailSender.send(message);
+    }
+
 }
 

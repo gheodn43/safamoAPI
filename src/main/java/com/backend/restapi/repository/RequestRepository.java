@@ -13,6 +13,7 @@ import com.backend.restapi.models.UserEntity;
 @Repository
 public interface RequestRepository extends JpaRepository<Request, Integer> {
 	List<RoomEntity> findByRoom(RoomEntity room);
+	List<Request> findByRoomAndUser(RoomEntity room, UserEntity user);
 	List<Request> findByUser(UserEntity user);
 }
 

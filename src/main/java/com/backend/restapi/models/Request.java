@@ -40,6 +40,7 @@ public class Request {
     @JoinColumn(name = "room_id")
     private RoomEntity room; 
     
+    private String duarationTime;
     
 	public UserEntity getUser() {
 		return user;
@@ -96,7 +97,14 @@ public class Request {
 	public void setRoom(RoomEntity room) {
 		this.room = room;
 	}
-    
+
+	public String getDuarationTime() {
+		return duarationTime;
+	}
+
+	public void setDuarationTime(String duarationTime) {
+		this.duarationTime = duarationTime;
+	}
     
 }
 

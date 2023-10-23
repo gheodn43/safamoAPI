@@ -9,6 +9,7 @@ public class RentalRequestDto {
 	String description;
 	String requestStatus;
 	String timeStamp;
+	String duarationTime;
 	public int getId() {
 		return id;
 	}
@@ -56,6 +57,12 @@ public class RentalRequestDto {
 	}
 	public void setRequestRole(String requestRole) {
 		this.requestRole = requestRole;
+	}
+	public String getDuarationTime() {
+		return duarationTime;
+	}
+	public void setDuarationTime(String duarationTime) {
+		this.duarationTime = duarationTime;
 	}
 	
 	
