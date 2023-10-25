@@ -37,8 +37,9 @@ public class RentalManageController {
 	private JWTGenerator jwtGenerator;
 
 	@Autowired
-	public RentalManageController(EmailService emailService,RequestService requestService, LandlordRequestDTO landlordRequestDTO,
-			JWTGenerator jwtGenerator, AuthorizationService authorizationService) {
+	public RentalManageController(EmailService emailService, RequestService requestService,
+			LandlordRequestDTO landlordRequestDTO, JWTGenerator jwtGenerator,
+			AuthorizationService authorizationService) {
 		this.emailService = emailService;
 		this.requestService = requestService;
 		this.landlordRequestDTO = landlordRequestDTO;
@@ -71,30 +72,29 @@ public class RentalManageController {
 	}
 
 	@PostMapping("/req_rental/get_all")
-	public ResponseEntity<List<RentalRequestDto>> getRentalRequestForRoom(
-	    @RequestParam("room_id") int roomId,
-	    @RequestHeader("Authorization") String authorizationHeader) {
-	    if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-	        String token = authorizationHeader.substring(7);
-	        int userId = jwtGenerator.getUserIdFromJWT(token);
-	            List<RentalRequestDto> requestDtos = requestService.getAllRentalRequestForRoom(roomId, userId);
-	            return ResponseEntity.ok(requestDtos);
-	    } else {
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-	    }
+	public ResponseEntity<List<RentalRequestDto>> getRentalRequestForRoom(@RequestParam("room_id") int roomId,
+			@RequestHeader("Authorization") String authorizationHeader) {
+		if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+			String token = authorizationHeader.substring(7);
+			int userId = jwtGenerator.getUserIdFromJWT(token);
+			List<RentalRequestDto> requestDtos = requestService.getAllRentalRequestForRoom(roomId, userId);
+			return ResponseEntity.ok(requestDtos);
+		} else {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		}
 	}
 
 	@PostMapping("/request/get_all")
 	public ResponseEntity<List<RentalRequestDto>> getAllRequestForSender(
-	    @RequestHeader("Authorization") String authorizationHeader) {
-	    if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-	        String token = authorizationHeader.substring(7);
-	        int userId = jwtGenerator.getUserIdFromJWT(token);
-	            List<RentalRequestDto> requestDtos = requestService.getAllRequestForSender(userId);
-	            return ResponseEntity.ok(requestDtos);
-	    } else {
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-	    }
+			@RequestHeader("Authorization") String authorizationHeader) {
+		if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+			String token = authorizationHeader.substring(7);
+			int userId = jwtGenerator.getUserIdFromJWT(token);
+			List<RentalRequestDto> requestDtos = requestService.getAllRequestForSender(userId);
+			return ResponseEntity.ok(requestDtos);
+		} else {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		}
 	}
 
 	@PostMapping("/req_landlord/reject")
@@ -144,7 +144,8 @@ public class RentalManageController {
 	}
 
 	@PostMapping("/req_rental/accept")
-	public ResponseEntity<String> acceptRentalRequest(@RequestParam("requestId") int requestId, @RequestBody String contractLink) {
+	public ResponseEntity<String> acceptRentalRequest(@RequestParam("requestId") int requestId,
+			@RequestBody String contractLink) {
 		try {
 			requestService.acceptRentalRequest(requestId, contractLink);
 			return ResponseEntity.ok("Yêu cầu đã được thông qua.");
@@ -180,6 +181,7 @@ public class RentalManageController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
 	}
+
 	@GetMapping("/view")
 	public ResponseEntity<RentalRequestDto> viewRequest(@AuthenticationPrincipal UserDetails userDetails,
 			@RequestParam("requestId") int requestId) {
@@ -191,12 +193,23 @@ public class RentalManageController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
 	}
-	
+
+	@GetMapping("/viewMyRequest")
+	public ResponseEntity<RentalRequestDto> vieưMyRequest(@RequestHeader("Authorization") String authorizationHeader,
+			@RequestParam("requestId") int requestId) {
+		if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+			String token = authorizationHeader.substring(7);
+			int userId = jwtGenerator.getUserIdFromJWT(token);
+			RentalRequestDto rentalRequest = requestService.getOneRentalReuqest(requestId);
+			return ResponseEntity.ok(rentalRequest);
+		} else {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		}
+	}
+
 	@PostMapping("/req_rentals/delete")
 	public ResponseEntity<String> deleteRentalRequestBySender(
-			@RequestHeader("Authorization") String authorizationHeader,
-			@RequestParam("roomId") int roomId
-			) {
+			@RequestHeader("Authorization") String authorizationHeader, @RequestParam("roomId") int roomId) {
 		if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
 			String token = authorizationHeader.substring(7);
 			int userId = jwtGenerator.getUserIdFromJWT(token);
@@ -205,5 +218,11 @@ public class RentalManageController {
 		} else {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
+	}
+
+	@PostMapping("/req_rental/delete")
+	public ResponseEntity<String> deleteRentalRequestAfterJoinRoom(@RequestParam("requestId") int requestId) {
+		requestService.DeleteRequestAfterJoinRoom(requestId);
+		return ResponseEntity.ok("Đã xóa yêu cầu thành công!");
 	}
 }

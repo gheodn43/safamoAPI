@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.backend.restapi.dto.OutputOwnerOfProperty;
 import com.backend.restapi.dto.PropertyDto;
 import com.backend.restapi.dto.RequestDto;
 import com.backend.restapi.exception.CustomException;
@@ -86,19 +87,21 @@ public class PropertyController {
 		}
 
 	}
+
 	@PostMapping("/edit/{propertyId}")
-    public ResponseEntity<String> editProperty(@PathVariable int propertyId, @RequestBody PropertyDto updatedPropertyDto,
-    		@RequestHeader("Authorization") String authorizationHeader) {
+	public ResponseEntity<String> editProperty(@PathVariable int propertyId,
+			@RequestBody PropertyDto updatedPropertyDto, @RequestHeader("Authorization") String authorizationHeader) {
 		if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
 			String token = authorizationHeader.substring(7);
 			int user_id = jwtGenerator.getUserIdFromJWT(token);
-            ResponseEntity<String> response = propertyService.editProperty(propertyId,user_id, updatedPropertyDto);
-            return response;
-        } else {
+			ResponseEntity<String> response = propertyService.editProperty(propertyId, user_id, updatedPropertyDto);
+			return response;
+		} else {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
-    }
-	@GetMapping("/view_all") //cho admin
+	}
+
+	@GetMapping("/view_all") // cho admin
 	public ResponseEntity<List<PropertyDto>> getAllProperties(@AuthenticationPrincipal UserDetails userDetails) {
 		if (userDetails.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ADMIN"))) {
 			List<PropertyDto> propertyDtos = propertyService.getAllPropertyForAdmin();
@@ -132,7 +135,7 @@ public class PropertyController {
 			throw new UnauthorizedException("Access denied");
 		}
 	}
-	
+
 	@PostMapping("/accept/{propertyId}")
 	public ResponseEntity<String> acceptProperty(@PathVariable int propertyId,
 			@AuthenticationPrincipal UserDetails userDetails) {
@@ -143,7 +146,7 @@ public class PropertyController {
 			throw new UnauthorizedException("Access denied");
 		}
 	}
-	
+
 	@PostMapping("/block/{propertyId}")
 	public ResponseEntity<String> blockProperty(@PathVariable int propertyId,
 			@AuthenticationPrincipal UserDetails userDetails) {
@@ -154,7 +157,7 @@ public class PropertyController {
 			throw new UnauthorizedException("Access denied");
 		}
 	}
-	
+
 	@PostMapping("/unblock/{propertyId}")
 	public ResponseEntity<String> unblockProperty(@PathVariable int propertyId,
 			@AuthenticationPrincipal UserDetails userDetails) {
@@ -166,4 +169,18 @@ public class PropertyController {
 		}
 	}
 
+	@GetMapping("/getOwner/{propertyId}")
+	public ResponseEntity<OutputOwnerOfProperty> getOwner(@PathVariable int propertyId) {
+		OutputOwnerOfProperty propertyInfo = null;
+		try {
+			propertyInfo = propertyService.getPropertyOwner(propertyId);
+			if (propertyInfo != null) {
+				return new ResponseEntity<>(propertyInfo, HttpStatus.OK);
+			} else {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+			}
+		} catch (CustomException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+		}
+	}
 }

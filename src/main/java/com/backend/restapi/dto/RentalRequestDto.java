@@ -4,6 +4,7 @@ public class RentalRequestDto {
 	int id;
 	int user_id;
 	int room_id;
+	int property_id;
 	String requestRole;
 	String username;
 	String description;
@@ -63,6 +64,12 @@ public class RentalRequestDto {
 	}
 	public void setDuarationTime(String duarationTime) {
 		this.duarationTime = duarationTime;
+	}
+	public int getProperty_id() {
+		return property_id;
+	}
+	public void setProperty_id(int property_id) {
+		this.property_id = property_id;
 	}
 	
 	

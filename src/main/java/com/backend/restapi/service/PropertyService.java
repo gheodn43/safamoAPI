@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.backend.restapi.dto.OutputOwnerOfProperty;
 import com.backend.restapi.dto.PropertyDto;
 import com.backend.restapi.exception.CustomException;
 import com.backend.restapi.models.GPSAddress;
@@ -122,15 +123,15 @@ public class PropertyService {
 			PropertyDto propertyInfo = new PropertyDto();
 			UserEntity ownerInfo = propertyOptional.get().getOwner();
 			PropertyStatus statusInfo = propertyOptional.get().getStatus();
-			//test
+			// test
 			List<Role> roles = ownerInfo.getRoles();
 			Boolean isCustomer = false;
 
 			for (Role role : roles) {
-			    if ("CUSTOMER".equals(role.getName())) {
-			        isCustomer = true;
-			        break; 
-			    }
+				if ("CUSTOMER".equals(role.getName())) {
+					isCustomer = true;
+					break;
+				}
 			}
 			if (isCustomer && user_id != ownerInfo.getUser_id()) {
 				if (!statusInfo.getStatus_name().equals("Đang hoạt động")) {
@@ -155,201 +156,220 @@ public class PropertyService {
 			return null;
 		}
 	}
-	public ResponseEntity<String> editProperty(int propertyId,int user_id, PropertyDto updatedPropertyDto) {
-        Optional<PropertyEntity> propertyOptional = propertyRepository.findById(propertyId);
-        if (propertyOptional.isPresent()) {
-        	PropertyEntity property = propertyOptional.get();
+
+	public ResponseEntity<String> editProperty(int propertyId, int user_id, PropertyDto updatedPropertyDto) {
+		Optional<PropertyEntity> propertyOptional = propertyRepository.findById(propertyId);
+		if (propertyOptional.isPresent()) {
+			PropertyEntity property = propertyOptional.get();
 			UserEntity ownerInfo = propertyOptional.get().getOwner();
 			PropertyStatus statusInfo = propertyOptional.get().getStatus();
-			
+
 			List<Role> roles = ownerInfo.getRoles();
 			Boolean isCustomer = false;
 
 			for (Role role : roles) {
-			    if ("CUSTOMER".equals(role.getName())) {
-			        isCustomer = true;
-			        break; 
-			    }
+				if ("CUSTOMER".equals(role.getName())) {
+					isCustomer = true;
+					break;
+				}
 			}
 			if (isCustomer && user_id != ownerInfo.getUser_id()) {
 				if (!statusInfo.getStatus_name().equals("Đang hoạt động")) {
 					throw new CustomException("Bạn không thể truy cập thông tin tài sản này.");
 				}
 			}
-            
-            property.setPropertyName(updatedPropertyDto.getPropertyName());
-            property.setAddress(updatedPropertyDto.getAddress());
-            property.setUnitForRent(updatedPropertyDto.getUnitForRent());
-            property.setPictureUrl(updatedPropertyDto.getPictureUrl());
-            propertyRepository.save(property);
-            return new ResponseEntity<>("Thông tin tài sản đã được cập nhật.", HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>("Không tìm thấy tài sản với ID đã cho.", HttpStatus.NOT_FOUND);
-        }
-    }
+
+			property.setPropertyName(updatedPropertyDto.getPropertyName());
+			property.setAddress(updatedPropertyDto.getAddress());
+			property.setUnitForRent(updatedPropertyDto.getUnitForRent());
+			property.setPictureUrl(updatedPropertyDto.getPictureUrl());
+			propertyRepository.save(property);
+			return new ResponseEntity<>("Thông tin tài sản đã được cập nhật.", HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>("Không tìm thấy tài sản với ID đã cho.", HttpStatus.NOT_FOUND);
+		}
+	}
+
 	public List<PropertyDto> getAllPropertyForAdmin() {
 		List<PropertyEntity> properties = propertyRepository.findAll();
-		
-		List<PropertyDto> propertyDtos = properties.stream()
-		        .map(property -> {
-		            PropertyDto propertyInfo = new PropertyDto();
-		            UserEntity ownerInfo = property.getOwner();
-		            propertyInfo.setId(property.getPropertyId());
-		            propertyInfo.setPropertyName(property.getPropertyName());
-		            propertyInfo.setOwner(property.getOwner().getUsername());
-		            propertyInfo.setOwnerEmail(ownerInfo.getEmail());
-		            propertyInfo.setUser_id(ownerInfo.getUser_id());
-		            propertyInfo.setAddress(property.getAddress());
-		            propertyInfo.setRegistrationDate(property.getRegistrationDate().toString());
-		            propertyInfo.setUnitForRent(property.getUnitForRent());
-		            propertyInfo.setStatus(property.getStatus().getStatus_name());
-		            propertyInfo.setGpsAddress(property.getGpsAddress());
-		            propertyInfo.setPictureUrl(property.getPictureUrl());
-		            PropertyRole propertyRole = property.getPropertyRole();
-		            if (propertyRole != null) {
-		                propertyInfo.setPropertyRole(propertyRole.getTypeName());
-		            } else {
-		                propertyInfo.setPropertyRole("Không xác định");
-		            }
-		            return propertyInfo;
-		        })
-		        .collect(Collectors.toList());
-		    sortByPropertyIdDescending(propertyDtos);
-		    return propertyDtos;
+
+		List<PropertyDto> propertyDtos = properties.stream().map(property -> {
+			PropertyDto propertyInfo = new PropertyDto();
+			UserEntity ownerInfo = property.getOwner();
+			propertyInfo.setId(property.getPropertyId());
+			propertyInfo.setPropertyName(property.getPropertyName());
+			propertyInfo.setOwner(property.getOwner().getUsername());
+			propertyInfo.setOwnerEmail(ownerInfo.getEmail());
+			propertyInfo.setUser_id(ownerInfo.getUser_id());
+			propertyInfo.setAddress(property.getAddress());
+			propertyInfo.setRegistrationDate(property.getRegistrationDate().toString());
+			propertyInfo.setUnitForRent(property.getUnitForRent());
+			propertyInfo.setStatus(property.getStatus().getStatus_name());
+			propertyInfo.setGpsAddress(property.getGpsAddress());
+			propertyInfo.setPictureUrl(property.getPictureUrl());
+			PropertyRole propertyRole = property.getPropertyRole();
+			if (propertyRole != null) {
+				propertyInfo.setPropertyRole(propertyRole.getTypeName());
+			} else {
+				propertyInfo.setPropertyRole("Không xác định");
+			}
+			return propertyInfo;
+		}).collect(Collectors.toList());
+		sortByPropertyIdDescending(propertyDtos);
+		return propertyDtos;
 	}
+
 	public List<PropertyDto> getAllPropertyForOwner(String username) {
-	    Optional<UserEntity> ownerOptional = userRepository.findByUsername(username);
-	    if (ownerOptional.isEmpty()) {
-	        return new ArrayList<>();
-	    }
-	    UserEntity owner = ownerOptional.get();
-	    List<PropertyEntity> propertiesOwnedByUser = propertyRepository.findByOwner(owner);
+		Optional<UserEntity> ownerOptional = userRepository.findByUsername(username);
+		if (ownerOptional.isEmpty()) {
+			return new ArrayList<>();
+		}
+		UserEntity owner = ownerOptional.get();
+		List<PropertyEntity> propertiesOwnedByUser = propertyRepository.findByOwner(owner);
 
-	    // Chuyển đổi PropertyEntity thành PropertyDto và thêm vào danh sách propertyDtos
-	    List<PropertyDto> propertyDtos = propertiesOwnedByUser.stream()
-	        .map(property -> {
-	            PropertyDto propertyInfo = new PropertyDto();
-	            propertyInfo.setId(property.getPropertyId());
-	            propertyInfo.setProperty_id(property.getPropertyId());
-	            propertyInfo.setPropertyName(property.getPropertyName());
-	            propertyInfo.setAddress(property.getAddress());
-	            propertyInfo.setRegistrationDate(property.getRegistrationDate().toString());
-	            propertyInfo.setUnitForRent(property.getUnitForRent());
-	            propertyInfo.setStatus(property.getStatus().getStatus_name());
-	            
-	            PropertyRole propertyRole = property.getPropertyRole();
-	            if (propertyRole != null) {
-	                propertyInfo.setPropertyRole(propertyRole.getTypeName());
-	            } else {
-	                propertyInfo.setPropertyRole("Không xác định");
-	            }
-	            return propertyInfo;
-	        })
-	        .collect(Collectors.toList());
+		// Chuyển đổi PropertyEntity thành PropertyDto và thêm vào danh sách
+		// propertyDtos
+		List<PropertyDto> propertyDtos = propertiesOwnedByUser.stream().map(property -> {
+			PropertyDto propertyInfo = new PropertyDto();
+			propertyInfo.setId(property.getPropertyId());
+			propertyInfo.setProperty_id(property.getPropertyId());
+			propertyInfo.setPropertyName(property.getPropertyName());
+			propertyInfo.setAddress(property.getAddress());
+			propertyInfo.setRegistrationDate(property.getRegistrationDate().toString());
+			propertyInfo.setUnitForRent(property.getUnitForRent());
+			propertyInfo.setStatus(property.getStatus().getStatus_name());
 
-	    sortByPropertyIdDescending(propertyDtos);
+			PropertyRole propertyRole = property.getPropertyRole();
+			if (propertyRole != null) {
+				propertyInfo.setPropertyRole(propertyRole.getTypeName());
+			} else {
+				propertyInfo.setPropertyRole("Không xác định");
+			}
+			return propertyInfo;
+		}).collect(Collectors.toList());
 
-	    return propertyDtos;
+		sortByPropertyIdDescending(propertyDtos);
+
+		return propertyDtos;
 	}
-    public ResponseEntity<String> adminDeniedProperty(int propertyId) {
-        Optional<PropertyEntity> propertyOptional = propertyRepository.findById(propertyId);
-        if (propertyOptional.isPresent()) {
-            PropertyEntity property = propertyOptional.get();
-            // Kiểm tra xem trạng thái hiện tại của tài sản là "Chưa được xét duyệt"
-            if (property.getStatus().getStatus_name().equals("Chưa được xét duyệt")) {
-                PropertyStatus deniedStatus = propStatusRepository.findById(6).orElse(null);
-                if (deniedStatus != null) {
-                    property.setStatus(deniedStatus);
-                    propertyRepository.save(property);
-                    return new ResponseEntity<>("Tài sản đã bị từ chối.", HttpStatus.OK);
-                } else {
-                    return new ResponseEntity<>("Không tìm thấy trạng thái 'Bị từ chối'.", HttpStatus.BAD_REQUEST);
-                }
-            } else {
-                return new ResponseEntity<>("Tài sản đã có trạng thái khác, không thể từ chối.", HttpStatus.BAD_REQUEST);
-            }
-        } else {
-            return new ResponseEntity<>("Không tìm thấy tài sản với ID đã cho.", HttpStatus.NOT_FOUND);
-        }
-    }
-    
-    public ResponseEntity<String> adminAcceptProperty(int propertyId) {
-        Optional<PropertyEntity> propertyOptional = propertyRepository.findById(propertyId);
-        if (propertyOptional.isPresent()) {
-            PropertyEntity property = propertyOptional.get();
-            // Kiểm tra xem trạng thái hiện tại của tài sản là "Chờ xử lý"
-            if (property.getStatus().getStatus_name().equals("Chưa được xét duyệt")) {
-                PropertyStatus activeStatus = propStatusRepository.findById(3).orElse(null);
-                if (activeStatus != null) {
-                    property.setStatus(activeStatus);
-                    propertyRepository.save(property);
-                    return new ResponseEntity<>("Tài sản đã được chấp nhận và đang hoạt động.", HttpStatus.OK);
-                } else {
-                    return new ResponseEntity<>("Không tìm thấy trạng thái 'Đang hoạt động'.", HttpStatus.BAD_REQUEST);
-                }
-            } else {
-                return new ResponseEntity<>("Tài sản đã có trạng thái khác, không thể chấp nhận.", HttpStatus.BAD_REQUEST);
-            }
-        } else {
-            return new ResponseEntity<>("Không tìm thấy tài sản với ID đã cho.", HttpStatus.NOT_FOUND);
-        }
-    }
-    
-    public ResponseEntity<String> adminBlockProperty(int propertyId) {
-        Optional<PropertyEntity> propertyOptional = propertyRepository.findById(propertyId);
 
-        if (propertyOptional.isPresent()) {
-            PropertyEntity property = propertyOptional.get();
+	public ResponseEntity<String> adminDeniedProperty(int propertyId) {
+		Optional<PropertyEntity> propertyOptional = propertyRepository.findById(propertyId);
+		if (propertyOptional.isPresent()) {
+			PropertyEntity property = propertyOptional.get();
+			// Kiểm tra xem trạng thái hiện tại của tài sản là "Chưa được xét duyệt"
+			if (property.getStatus().getStatus_name().equals("Chưa được xét duyệt")) {
+				PropertyStatus deniedStatus = propStatusRepository.findById(6).orElse(null);
+				if (deniedStatus != null) {
+					property.setStatus(deniedStatus);
+					propertyRepository.save(property);
+					return new ResponseEntity<>("Tài sản đã bị từ chối.", HttpStatus.OK);
+				} else {
+					return new ResponseEntity<>("Không tìm thấy trạng thái 'Bị từ chối'.", HttpStatus.BAD_REQUEST);
+				}
+			} else {
+				return new ResponseEntity<>("Tài sản đã có trạng thái khác, không thể từ chối.",
+						HttpStatus.BAD_REQUEST);
+			}
+		} else {
+			return new ResponseEntity<>("Không tìm thấy tài sản với ID đã cho.", HttpStatus.NOT_FOUND);
+		}
+	}
 
-            if (property.getStatus().getStatus_name().equals("Đang hoạt động")) {
-                PropertyStatus blockedStatus = propStatusRepository.findById(4).orElse(null);
-                if (blockedStatus != null) {
-                    property.setStatus(blockedStatus);
-                    propertyRepository.save(property);
-                    return new ResponseEntity<>("Tài sản đã bị khóa.", HttpStatus.OK);
-                } else {
-                    return new ResponseEntity<>("Không tìm thấy trạng thái 'Bị khóa'.", HttpStatus.BAD_REQUEST);
-                }
-            } else {
-                return new ResponseEntity<>("Tài sản không ở trạng thái 'Đang hoạt động', không thể khóa.", HttpStatus.BAD_REQUEST);
-            }
-        } else {
-            return new ResponseEntity<>("Không tìm thấy tài sản với ID đã cho.", HttpStatus.NOT_FOUND);
-        }
-    }
-    
+	public ResponseEntity<String> adminAcceptProperty(int propertyId) {
+		Optional<PropertyEntity> propertyOptional = propertyRepository.findById(propertyId);
+		if (propertyOptional.isPresent()) {
+			PropertyEntity property = propertyOptional.get();
+			// Kiểm tra xem trạng thái hiện tại của tài sản là "Chờ xử lý"
+			if (property.getStatus().getStatus_name().equals("Chưa được xét duyệt")) {
+				PropertyStatus activeStatus = propStatusRepository.findById(3).orElse(null);
+				if (activeStatus != null) {
+					property.setStatus(activeStatus);
+					propertyRepository.save(property);
+					return new ResponseEntity<>("Tài sản đã được chấp nhận và đang hoạt động.", HttpStatus.OK);
+				} else {
+					return new ResponseEntity<>("Không tìm thấy trạng thái 'Đang hoạt động'.", HttpStatus.BAD_REQUEST);
+				}
+			} else {
+				return new ResponseEntity<>("Tài sản đã có trạng thái khác, không thể chấp nhận.",
+						HttpStatus.BAD_REQUEST);
+			}
+		} else {
+			return new ResponseEntity<>("Không tìm thấy tài sản với ID đã cho.", HttpStatus.NOT_FOUND);
+		}
+	}
 
+	public ResponseEntity<String> adminBlockProperty(int propertyId) {
+		Optional<PropertyEntity> propertyOptional = propertyRepository.findById(propertyId);
 
-        public ResponseEntity<String> adminUnblockProperty(int propertyId) {
-            Optional<PropertyEntity> propertyOptional = propertyRepository.findById(propertyId);
+		if (propertyOptional.isPresent()) {
+			PropertyEntity property = propertyOptional.get();
 
-            if (propertyOptional.isPresent()) {
-                PropertyEntity property = propertyOptional.get();
-                if (property.getStatus().getStatus_name().equals("Bị khóa")) {
-                    PropertyStatus activeStatus = propStatusRepository.findById(3).orElse(null);
-                    if (activeStatus != null) {
-                        property.setStatus(activeStatus);
-                        propertyRepository.save(property);
-                        return new ResponseEntity<>("Tài sản đã được mở khóa và đang hoạt động.", HttpStatus.OK);
-                    } else {
-                        return new ResponseEntity<>("Không tìm thấy trạng thái 'Đang hoạt động'.", HttpStatus.BAD_REQUEST);
-                    }
-                } else {
-                    return new ResponseEntity<>("Tài sản không ở trạng thái 'Bị khóa', không thể mở khóa.", HttpStatus.BAD_REQUEST);
-                }
-            } else {
-                return new ResponseEntity<>("Không tìm thấy tài sản với ID đã cho.", HttpStatus.NOT_FOUND);
-            }
-        }
-        
-        
-    
+			if (property.getStatus().getStatus_name().equals("Đang hoạt động")) {
+				PropertyStatus blockedStatus = propStatusRepository.findById(4).orElse(null);
+				if (blockedStatus != null) {
+					property.setStatus(blockedStatus);
+					propertyRepository.save(property);
+					return new ResponseEntity<>("Tài sản đã bị khóa.", HttpStatus.OK);
+				} else {
+					return new ResponseEntity<>("Không tìm thấy trạng thái 'Bị khóa'.", HttpStatus.BAD_REQUEST);
+				}
+			} else {
+				return new ResponseEntity<>("Tài sản không ở trạng thái 'Đang hoạt động', không thể khóa.",
+						HttpStatus.BAD_REQUEST);
+			}
+		} else {
+			return new ResponseEntity<>("Không tìm thấy tài sản với ID đã cho.", HttpStatus.NOT_FOUND);
+		}
+	}
+
+	public ResponseEntity<String> adminUnblockProperty(int propertyId) {
+		Optional<PropertyEntity> propertyOptional = propertyRepository.findById(propertyId);
+
+		if (propertyOptional.isPresent()) {
+			PropertyEntity property = propertyOptional.get();
+			if (property.getStatus().getStatus_name().equals("Bị khóa")) {
+				PropertyStatus activeStatus = propStatusRepository.findById(3).orElse(null);
+				if (activeStatus != null) {
+					property.setStatus(activeStatus);
+					propertyRepository.save(property);
+					return new ResponseEntity<>("Tài sản đã được mở khóa và đang hoạt động.", HttpStatus.OK);
+				} else {
+					return new ResponseEntity<>("Không tìm thấy trạng thái 'Đang hoạt động'.", HttpStatus.BAD_REQUEST);
+				}
+			} else {
+				return new ResponseEntity<>("Tài sản không ở trạng thái 'Bị khóa', không thể mở khóa.",
+						HttpStatus.BAD_REQUEST);
+			}
+		} else {
+			return new ResponseEntity<>("Không tìm thấy tài sản với ID đã cho.", HttpStatus.NOT_FOUND);
+		}
+	}
+
+	public OutputOwnerOfProperty getPropertyOwner(int property_id) {
+		PropertyEntity property = propertyRepository.findById(property_id).orElse(null);
+		if (property != null) {
+			OutputOwnerOfProperty propertyInfo = new OutputOwnerOfProperty();
+			PropertyStatus statusInfo = property.getStatus();
+			if (!statusInfo.getStatus_name().equals("Đang hoạt động")) {
+				throw new CustomException("Bạn không thể truy cập thông tin tài sản này.");
+			}
+			propertyInfo.setOwner_id(property.getOwner().getUser_id());
+			propertyInfo.setOwner_fullname(property.getOwner().getFullname());
+			propertyInfo.setOwner_email(property.getOwner().getEmail());
+			propertyInfo.setOwner_NTNS(property.getOwner().getBirthdate());
+			propertyInfo.setOwner_username(property.getOwner().getUsername());
+			return propertyInfo;
+		} else {
+			return null;
+		}
+	}
+
 	public static void sortByPropertyIdDescending(List<PropertyDto> propertyDtos) {
-	    Comparator<PropertyDto> idComparator = (propertyDtos1, propertyDtos2) -> {
-	        return propertyDtos2.getId() - propertyDtos1.getId();
-	    };
-	    Collections.sort(propertyDtos, idComparator);
+		Comparator<PropertyDto> idComparator = (propertyDtos1, propertyDtos2) -> {
+			return propertyDtos2.getId() - propertyDtos1.getId();
+		};
+		Collections.sort(propertyDtos, idComparator);
 	}
-
 
 }

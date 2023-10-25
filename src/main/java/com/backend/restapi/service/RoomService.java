@@ -449,6 +449,50 @@ public class RoomService {
 			return new ResponseEntity<>("Không tìm thấy phòng với ID đã cho", HttpStatus.NOT_FOUND);
 		}
 	}
+	
+	public ResponseEntity<String> draftContract(int roomId) {
+		Optional<RoomEntity> roomOptional = roomRepository.findById(roomId);
+		if (roomOptional.isPresent()) {
+			RoomEntity room = roomOptional.get();
+			// Kiểm tra xem phòng có đang ở trạng thái "Sẵn sàng cho thuê"
+			if (room.getStatus().getId() == 1) {
+				// Lấy trạng thái "Soạn hợp đồng" từ cơ sở dữ liệu
+				RoomStatus activeStatus = roomStatusRepository.findById(6).orElse(null);
+				if (activeStatus == null) {
+					return new ResponseEntity<>("Không tìm thấy trạng thái 'Đang khởi tạo hợp đồng'", HttpStatus.BAD_REQUEST);
+				}
+				room.setStatus(activeStatus);
+				roomRepository.save(room);
+				return new ResponseEntity<>("Thay đổi trang thái thành công", HttpStatus.OK);
+			} else {
+				return new ResponseEntity<>("Phòng không ở trạng thái khả dụng", HttpStatus.BAD_REQUEST);
+			}
+		} else {
+			return new ResponseEntity<>("Không tìm thấy phòng với ID đã cho", HttpStatus.NOT_FOUND);
+		}
+	}
+	
+	public ResponseEntity<String> joinRoom(int roomId) {
+		Optional<RoomEntity> roomOptional = roomRepository.findById(roomId);
+		if (roomOptional.isPresent()) {
+			RoomEntity room = roomOptional.get();
+			// Kiểm tra xem phòng có đang ở trạng thái "Đang soạn hợp đồng"
+			if (room.getStatus().getId() == 6) {
+				// Lấy trạng thái "Soạn hợp đồng" từ cơ sở dữ liệu
+				RoomStatus activeStatus = roomStatusRepository.findById(2).orElse(null);
+				if (activeStatus == null) {
+					return new ResponseEntity<>("Không tìm thấy trạng thái", HttpStatus.BAD_REQUEST);
+				}
+				room.setStatus(activeStatus);
+				roomRepository.save(room);
+				return new ResponseEntity<>("Bạn đã thuê phòng thành công", HttpStatus.OK);
+			} else {
+				return new ResponseEntity<>("Phòng không ở trạng thái khả dụng", HttpStatus.BAD_REQUEST);
+			}
+		} else {
+			return new ResponseEntity<>("Không tìm thấy phòng với ID đã cho", HttpStatus.NOT_FOUND);
+		}
+	}
 
 	public ResponseEntity<String> deleteRoomForOwner(int roomId, int user_id) {
 		Optional<RoomEntity> roomOptional = roomRepository.findById(roomId);

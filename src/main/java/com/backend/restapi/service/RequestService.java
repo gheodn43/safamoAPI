@@ -311,6 +311,8 @@ public class RequestService {
 		RentalRequestDto requestDto = new RentalRequestDto();
 		requestDto.setId(rentalRequest.getId());
 		requestDto.setUser_id(rentalRequest.getUser().getUser_id());
+		requestDto.setRoom_id(rentalRequest.getRoom().getId());
+		requestDto.setProperty_id(rentalRequest.getRoom().getProperty().getPropertyId());
 		requestDto.setDescription(rentalRequest.getDescription());
 		String requestStatus = mapRequestStatus(rentalRequest.getRequestStatus().getName());
 		requestDto.setRequestStatus(requestStatus);
@@ -355,6 +357,14 @@ public class RequestService {
 		if (room != null && user != null) {
             List<Request> requests = requestRepository.findByRoomAndUser(room, user);
             requestRepository.deleteAll(requests);
+        }
+	}
+	
+	@Transactional
+	public void DeleteRequestAfterJoinRoom(int requestId) {
+		Request request = requestRepository.findById(requestId).orElse(null);
+		if (request != null) {
+            requestRepository.delete(request);
         }
 	}
 
