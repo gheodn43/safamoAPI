@@ -219,6 +219,12 @@ public class RentalManageController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
 	}
+	
+	@PostMapping("/req_rental/deleted")
+	public ResponseEntity<String> deleteRentalRequet( @RequestParam("requestId") int requestId) {
+			requestService.DeleteRequest(requestId);
+			return ResponseEntity.ok("Đã xóa yêu cầu thành công!");
+	}
 
 	@PostMapping("/req_rental/delete")
 	public ResponseEntity<String> deleteRentalRequestAfterJoinRoom(@RequestParam("requestId") int requestId) {

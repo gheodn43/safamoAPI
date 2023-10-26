@@ -185,6 +185,20 @@ public class RoomController {
 			ResponseEntity<String> response = roomService.joinRoom(roomId);
 			return response;
 	}
+	
+	@PostMapping("/room/find-compound/{roomId}") // cho customer
+	public ResponseEntity<String> FindCompound(@PathVariable int roomId,
+			@AuthenticationPrincipal UserDetails userDetails) {
+			ResponseEntity<String> response = roomService.FindCompound(roomId);
+			return response;
+	}
+	
+	@PostMapping("/room/cancel-find-compound/{roomId}") // cho customer
+	public ResponseEntity<String> CancelFindCompound(@PathVariable int roomId,
+			@AuthenticationPrincipal UserDetails userDetails) {
+			ResponseEntity<String> response = roomService.CancelFindCompound(roomId);
+			return response;
+	}
 
 	@DeleteMapping("/my_room/delete/{roomId}")
 	public ResponseEntity<String> deleteRoom(@PathVariable int roomId,

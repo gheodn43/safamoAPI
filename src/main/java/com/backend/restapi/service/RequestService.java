@@ -263,17 +263,17 @@ public class RequestService {
 		List<RentalRequestDto> requestDtos = new ArrayList<>();
 		for (Request request : roomRequests) {
 			RentalRequestDto requestDto = new RentalRequestDto();
-
-			requestDto.setId(request.getId());
-			requestDto.setUser_id(request.getUser().getUser_id());
-			requestDto.setRoom_id(request.getRoom().getId());
-			requestDto.setUsername(request.getUser().getUsername());
-			requestDto.setDescription(request.getDescription());
-			String requestStatus = mapRequestStatus(request.getRequestStatus().getName());
-			requestDto.setRequestStatus(requestStatus);
-			requestDto.setTimeStamp(request.getTimeStamp());
-			requestDtos.add(requestDto);
-
+			if(request.getRequestStatus().getId() != 5) {
+				requestDto.setId(request.getId());
+				requestDto.setUser_id(request.getUser().getUser_id());
+				requestDto.setRoom_id(request.getRoom().getId());
+				requestDto.setUsername(request.getUser().getUsername());
+				requestDto.setDescription(request.getDescription());
+				String requestStatus = mapRequestStatus(request.getRequestStatus().getName());
+				requestDto.setRequestStatus(requestStatus);
+				requestDto.setTimeStamp(request.getTimeStamp());
+				requestDtos.add(requestDto);
+			}
 		}
 		return requestDtos;
 	}
@@ -361,6 +361,25 @@ public class RequestService {
 	}
 	
 	@Transactional
+	public void DeleteRequest(int request_id) {
+		Request request = requestRepository.findById(request_id).orElse(null);
+
+		if (request != null) {
+			if (request.getRequestStatus().getId() == 2) {
+				RequestStatus deletedStatus = requestStatusRepository.findById(5).orElse(null);
+				if (deletedStatus != null) {
+					request.setRequestStatus(deletedStatus);
+					requestRepository.save(request);
+				} else {
+					throw new RuntimeException("Trạng thái 'Hủy bỏ' không tồn tại.");
+				}
+			} else {
+				throw new RuntimeException("Không thể hủy yêu cầu với trạng thái hiện tại.");
+			}
+        }
+	}
+	
+	@Transactional
 	public void DeleteRequestAfterJoinRoom(int requestId) {
 		Request request = requestRepository.findById(requestId).orElse(null);
 		if (request != null) {
@@ -378,6 +397,8 @@ public class RequestService {
 			return "Đã bị hủy";
 		case "Chờ xử lý":
 			return "Chờ xét duyệt";
+		case "Bị Xóa":
+			return "Đã bị xóa";
 		default:
 			return statusName;
 		}

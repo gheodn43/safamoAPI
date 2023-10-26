@@ -11,6 +11,17 @@ public class RoomPrivateOutputDto {
     private List<String> tags;
     private String status;
     private List<String> picturesURL;
+    private double ratingStar; 
+
+    public double getRatingStar() {
+        return ratingStar;
+    }
+
+    public void setRatingStar(double ratingStar) {
+        this.ratingStar = ratingStar;
+    }
+    
+    
 	public int getRoom_id() {
 		return room_id;
 	}

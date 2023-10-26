@@ -52,6 +52,9 @@ public class RoomEntity {
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
     private List<Request> requests;
     
+    @Column(name = "starRating", columnDefinition = "DECIMAL(3, 1)")
+    private double starRating;
+    
 	public int getId() {
 		return id;
 	}
@@ -117,6 +120,12 @@ public class RoomEntity {
 	}
 	public void setRequests(List<Request> requests) {
 		this.requests = requests;
+	}
+	public double getStarRating() {
+		return starRating;
+	}
+	public void setStarRating(double starRating) {
+		this.starRating = starRating;
 	}
 	
 	

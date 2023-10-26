@@ -134,6 +134,7 @@ public class RoomService {
 					}
 					roomInfo.setPicturesURL(pictureURLs);
 					roomInfo.setTags(tagsName);
+					roomInfo.setRatingStar(room.getStarRating());
 		            return roomInfo;
 		        })
 		        .collect(Collectors.toList());
@@ -169,6 +170,7 @@ public class RoomService {
 			roomDto.setMaxQuantity(roomEntity.getMaxQuantity());
 			roomDto.setStatus(roomEntity.getStatus().getName());
 			roomDto.setGpsAddress(roomEntity.getProperty().getGpsAddress());
+			roomDto.setRatingStar(roomEntity.getStarRating());
 			return roomDto;
 		} else {
 			return null;
@@ -210,6 +212,7 @@ public class RoomService {
 			dto.setTagIds(tagsId);
 			dto.setTags(tagsName);
 			dto.setPicturesURL(pictureURLs);
+			dto.setRatingStar(roomEntity.getStarRating());
 			return dto;
 		}).collect(Collectors.toList());
 		return roomDtos;
@@ -253,6 +256,7 @@ public class RoomService {
 			roomDto.setPicturesURL(pictureURLs);
 			roomDto.setTags(tagsName);
 			roomDto.setPicturesURL(pictureURLs);
+			roomDto.setRatingStar(roomEntity.getStarRating());
 			return roomDto;
 		} else {
 			return null;
@@ -308,6 +312,7 @@ public class RoomService {
 			roomEntity.setMaxQuantity(roomDto.getMaxQuantity());
 			roomEntity.setStatus(status);
 			roomEntity.setProperty(propertyOptional.get());
+			roomEntity.setStarRating(5);
 			roomRepository.save(roomEntity);
 			return new ResponseEntity<>("room created successfully!", HttpStatus.OK);
 		} else {
@@ -486,6 +491,48 @@ public class RoomService {
 				room.setStatus(activeStatus);
 				roomRepository.save(room);
 				return new ResponseEntity<>("Bạn đã thuê phòng thành công", HttpStatus.OK);
+			} else {
+				return new ResponseEntity<>("Phòng không ở trạng thái khả dụng", HttpStatus.BAD_REQUEST);
+			}
+		} else {
+			return new ResponseEntity<>("Không tìm thấy phòng với ID đã cho", HttpStatus.NOT_FOUND);
+		}
+	}
+	
+	public ResponseEntity<String> FindCompound(int roomId) {
+		Optional<RoomEntity> roomOptional = roomRepository.findById(roomId);
+		if (roomOptional.isPresent()) {
+			RoomEntity room = roomOptional.get();
+			if (room.getStatus().getId() == 2) {
+				// Lấy trạng thái "Soạn hợp đồng" từ cơ sở dữ liệu
+				RoomStatus activeStatus = roomStatusRepository.findById(3).orElse(null);
+				if (activeStatus == null) {
+					return new ResponseEntity<>("Không tìm thấy trạng thái", HttpStatus.BAD_REQUEST);
+				}
+				room.setStatus(activeStatus);
+				roomRepository.save(room);
+				return new ResponseEntity<>("Đang tìm người ở ghép", HttpStatus.OK);
+			} else {
+				return new ResponseEntity<>("Phòng không ở trạng thái khả dụng", HttpStatus.BAD_REQUEST);
+			}
+		} else {
+			return new ResponseEntity<>("Không tìm thấy phòng với ID đã cho", HttpStatus.NOT_FOUND);
+		}
+	}
+	
+	public ResponseEntity<String> CancelFindCompound(int roomId) {
+		Optional<RoomEntity> roomOptional = roomRepository.findById(roomId);
+		if (roomOptional.isPresent()) {
+			RoomEntity room = roomOptional.get();
+			if (room.getStatus().getId() == 3) {
+				// Lấy trạng thái "Soạn hợp đồng" từ cơ sở dữ liệu
+				RoomStatus activeStatus = roomStatusRepository.findById(2).orElse(null);
+				if (activeStatus == null) {
+					return new ResponseEntity<>("Không tìm thấy trạng thái", HttpStatus.BAD_REQUEST);
+				}
+				room.setStatus(activeStatus);
+				roomRepository.save(room);
+				return new ResponseEntity<>("Đang tìm người ở ghép", HttpStatus.OK);
 			} else {
 				return new ResponseEntity<>("Phòng không ở trạng thái khả dụng", HttpStatus.BAD_REQUEST);
 			}

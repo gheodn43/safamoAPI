@@ -25,6 +25,16 @@ public class RoomDto {
     private List<String> picturesURL;
     private GPSAddress gpsAddress;
     
+    private double ratingStar; 
+
+    public double getRatingStar() {
+        return ratingStar;
+    }
+
+    public void setRatingStar(double ratingStar) {
+        this.ratingStar = ratingStar;
+    }
+    
 	public String getAddress() {
 		return address;
 	}

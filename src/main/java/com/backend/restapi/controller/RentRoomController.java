@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.backend.restapi.dto.ContractDto;
+import com.backend.restapi.dto.RentRoomDto;
 import com.backend.restapi.dto.RoomDto;
 import com.backend.restapi.security.JWTGenerator;
 import com.backend.restapi.service.ContractService;
@@ -29,14 +30,14 @@ public class RentRoomController {
 	private ContractService contractService;
 	private RentRoomService rentRoomService;
 	private JWTGenerator jwtGenerator;
-	
+
 	@Autowired
-	public RentRoomController(ContractService contractService, RentRoomService rentRoomService, JWTGenerator jwtGenerator) {
+	public RentRoomController(ContractService contractService, RentRoomService rentRoomService,
+			JWTGenerator jwtGenerator) {
 		this.contractService = contractService;
 		this.rentRoomService = rentRoomService;
 		this.jwtGenerator = jwtGenerator;
 	}
-
 
 	@PostMapping("/rentRoom/joinRoom")
 	public ResponseEntity<Integer> joinRoom(@RequestParam("room_id") int room_id,
@@ -50,7 +51,7 @@ public class RentRoomController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
 	}
-	
+
 	@PostMapping("/rentRoom/joinRoomWithDependent")
 	public ResponseEntity<Integer> joinRoomWithDependent(@RequestParam("rentRoom_id") int rentRoom_id,
 			@RequestHeader("Authorization") String authorizationHeader) {
@@ -63,7 +64,7 @@ public class RentRoomController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
 	}
-	
+
 	@GetMapping("/MyRoomRented")
 	public ResponseEntity<List<RoomDto>> getRoomsRented(@RequestHeader("Authorization") String authorizationHeader) {
 		if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
@@ -74,5 +75,23 @@ public class RentRoomController {
 		} else {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
+	}
+	
+	@GetMapping("/GetAllRentRooms")
+	public ResponseEntity<List<RentRoomDto>> getAllRentRooms(@RequestHeader("Authorization") String authorizationHeader) {
+		if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+			String token = authorizationHeader.substring(7);
+			int userId = jwtGenerator.getUserIdFromJWT(token);
+			List<RentRoomDto> rentRoomDtos = rentRoomService.getAllRentRooms(userId);
+			return ResponseEntity.ok(rentRoomDtos);
+		} else {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		}
+	}
+
+	@GetMapping("/MyRoomRentedDetail")
+	public ResponseEntity<RoomDto> getRoomsRentedDetail(@RequestParam("rentRoom_id") int rentRoom_id) {
+		RoomDto RoomDto = rentRoomService.getRoomRented(rentRoom_id);
+		return ResponseEntity.ok(RoomDto);
 	}
 }
