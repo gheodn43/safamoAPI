@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import com.backend.restapi.dto.OutputOwnerOfProperty;
 import com.backend.restapi.dto.PropertyDto;
+import com.backend.restapi.dto.PropertyForCusDto;
 import com.backend.restapi.exception.CustomException;
 import com.backend.restapi.models.GPSAddress;
 import com.backend.restapi.models.PropertyEntity;
@@ -24,6 +25,7 @@ import com.backend.restapi.models.PropertyRole;
 import com.backend.restapi.models.PropertyStatus;
 import com.backend.restapi.models.Request;
 import com.backend.restapi.models.Role;
+import com.backend.restapi.models.RoomEntity;
 import com.backend.restapi.models.UserEntity;
 import com.backend.restapi.repository.GPSAddressRepository;
 import com.backend.restapi.repository.PropertyRepository;
@@ -365,11 +367,40 @@ public class PropertyService {
 		}
 	}
 
+	
 	public static void sortByPropertyIdDescending(List<PropertyDto> propertyDtos) {
 		Comparator<PropertyDto> idComparator = (propertyDtos1, propertyDtos2) -> {
 			return propertyDtos2.getId() - propertyDtos1.getId();
 		};
 		Collections.sort(propertyDtos, idComparator);
+	}
+	
+	public PropertyForCusDto getPropertyInforForGuest(int property_id) {
+		PropertyEntity property = propertyRepository.findById(property_id).orElse(null);
+		PropertyForCusDto propertyDto = new PropertyForCusDto();
+		if (property != null && (property.getStatus().getId() == 2 || property.getStatus().getId() == 3)) {
+			int unitForRentIsValid = 0;
+			propertyDto.setId(property.getPropertyId());
+			propertyDto.setPropertyName(property.getPropertyName());
+			propertyDto.setAddress(property.getAddress());
+			propertyDto.setUnitForRent(property.getUnitForRent());
+			propertyDto.setPictureUrl(property.getPictureUrl());
+			propertyDto.setStatus(property.getStatus().getStatus_name());
+			propertyDto.setPropertyRole(property.getPropertyRole().getTypeName());
+			propertyDto.setOwnerName(property.getOwner().getFullname());
+			propertyDto.setOwnerId(property.getOwner().getUser_id());
+			List<Integer> roomsValid_id = new ArrayList<>();
+			List<RoomEntity> rooms = property.getRooms();
+			for(RoomEntity roomIsValid : rooms) {
+				if(roomIsValid.getStatus().getId() == 1 || roomIsValid.getStatus().getId() == 3) {
+					unitForRentIsValid++;
+					roomsValid_id.add(roomIsValid.getId());
+				}
+			}
+			propertyDto.setUnitForRentIsValid(unitForRentIsValid);
+			propertyDto.setRoomIds(roomsValid_id);
+		}
+		return propertyDto;
 	}
 
 }

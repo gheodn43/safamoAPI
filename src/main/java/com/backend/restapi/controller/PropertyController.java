@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.backend.restapi.dto.OutputOwnerOfProperty;
 import com.backend.restapi.dto.PropertyDto;
+import com.backend.restapi.dto.PropertyForCusDto;
 import com.backend.restapi.dto.RequestDto;
 import com.backend.restapi.exception.CustomException;
 import com.backend.restapi.exception.DuplicateRoleException;
@@ -28,7 +29,7 @@ import com.backend.restapi.security.JWTGenerator;
 import com.backend.restapi.service.PropertyService;
 
 @RestController
-@RequestMapping("/api/properties")
+@RequestMapping("/api")
 public class PropertyController {
 
 	@Autowired
@@ -41,7 +42,7 @@ public class PropertyController {
 		this.jwtGenerator = jwtGenerator;
 	}
 
-	@PostMapping("/create")
+	@PostMapping("/properties/create")
 	public ResponseEntity<String> createProperty(@RequestBody PropertyDto propertyDto, Principal principal) {
 		String username = principal.getName();
 		ResponseEntity<String> response = propertyService.createProperty(propertyDto, username);
@@ -49,7 +50,7 @@ public class PropertyController {
 	}
 
 	// cho admin
-	@GetMapping("/{propertyId}")
+	@GetMapping("/properties/{propertyId}")
 	public ResponseEntity<PropertyDto> getPropertyInfoForAdmin(@PathVariable int propertyId) {
 		PropertyDto propertyInfo = propertyService.getPropertyInfoForAdmin(propertyId);
 
@@ -62,7 +63,7 @@ public class PropertyController {
 
 	// cho customer - trả về lỗi nếu có gắng truy cập các property bị khóa hoặc đang
 	// tạm ngừng hoạt động
-	@GetMapping("/preview/{propertyId}")
+	@GetMapping("/properties/preview/{propertyId}")
 	public ResponseEntity<PropertyDto> getPropertyInfoForCustomer(@PathVariable int propertyId,
 			@RequestHeader("Authorization") String authorizationHeader) {
 		PropertyDto propertyInfo = null;
@@ -88,7 +89,7 @@ public class PropertyController {
 
 	}
 
-	@PostMapping("/edit/{propertyId}")
+	@PostMapping("/properties/edit/{propertyId}")
 	public ResponseEntity<String> editProperty(@PathVariable int propertyId,
 			@RequestBody PropertyDto updatedPropertyDto, @RequestHeader("Authorization") String authorizationHeader) {
 		if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
@@ -101,7 +102,7 @@ public class PropertyController {
 		}
 	}
 
-	@GetMapping("/view_all") // cho admin
+	@GetMapping("/properties/view_all") // cho admin
 	public ResponseEntity<List<PropertyDto>> getAllProperties(@AuthenticationPrincipal UserDetails userDetails) {
 		if (userDetails.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ADMIN"))) {
 			List<PropertyDto> propertyDtos = propertyService.getAllPropertyForAdmin();
@@ -111,7 +112,7 @@ public class PropertyController {
 		}
 	}
 
-	@GetMapping("/my_properties")
+	@GetMapping("/properties/my_properties")
 	public ResponseEntity<List<PropertyDto>> getAllRequests(
 			@RequestHeader("Authorization") String authorizationHeader) {
 		if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
@@ -125,7 +126,7 @@ public class PropertyController {
 
 	}
 
-	@PostMapping("/denie/{propertyId}")
+	@PostMapping("/properties/denie/{propertyId}")
 	public ResponseEntity<String> denieProperty(@PathVariable int propertyId,
 			@AuthenticationPrincipal UserDetails userDetails) {
 		if (userDetails.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ADMIN"))) {
@@ -136,7 +137,7 @@ public class PropertyController {
 		}
 	}
 
-	@PostMapping("/accept/{propertyId}")
+	@PostMapping("/properties/accept/{propertyId}")
 	public ResponseEntity<String> acceptProperty(@PathVariable int propertyId,
 			@AuthenticationPrincipal UserDetails userDetails) {
 		if (userDetails.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ADMIN"))) {
@@ -147,7 +148,7 @@ public class PropertyController {
 		}
 	}
 
-	@PostMapping("/block/{propertyId}")
+	@PostMapping("/properties/block/{propertyId}")
 	public ResponseEntity<String> blockProperty(@PathVariable int propertyId,
 			@AuthenticationPrincipal UserDetails userDetails) {
 		if (userDetails.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ADMIN"))) {
@@ -158,7 +159,7 @@ public class PropertyController {
 		}
 	}
 
-	@PostMapping("/unblock/{propertyId}")
+	@PostMapping("/properties/unblock/{propertyId}")
 	public ResponseEntity<String> unblockProperty(@PathVariable int propertyId,
 			@AuthenticationPrincipal UserDetails userDetails) {
 		if (userDetails.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ADMIN"))) {
@@ -169,7 +170,7 @@ public class PropertyController {
 		}
 	}
 
-	@GetMapping("/getOwner/{propertyId}")
+	@GetMapping("/properties/getOwner/{propertyId}")
 	public ResponseEntity<OutputOwnerOfProperty> getOwner(@PathVariable int propertyId) {
 		OutputOwnerOfProperty propertyInfo = null;
 		try {
@@ -183,4 +184,19 @@ public class PropertyController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 		}
 	}
+	@GetMapping("/auth/property/{propertyId}")
+	public ResponseEntity<PropertyForCusDto> getPropertyIsValid(@PathVariable int propertyId) {
+		PropertyForCusDto propertyInfo = null;
+		try {
+			propertyInfo = propertyService.getPropertyInforForGuest(propertyId);
+			if (propertyInfo != null) {
+				return new ResponseEntity<>(propertyInfo, HttpStatus.OK);
+			} else {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+			}
+		} catch (CustomException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+		}
+	}
+	
 }

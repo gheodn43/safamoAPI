@@ -21,6 +21,7 @@ import com.backend.restapi.dto.PropertyDto;
 import com.backend.restapi.dto.RoomDto;
 import com.backend.restapi.dto.RoomPictureDto;
 import com.backend.restapi.dto.RoomPrivateOutputDto;
+import com.backend.restapi.dto.RoomRoleDto;
 import com.backend.restapi.exception.UnauthorizedException;
 import com.backend.restapi.security.JWTGenerator;
 import com.backend.restapi.service.PropertyService;
@@ -211,6 +212,11 @@ public class RoomController {
 		} else {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
+	}
+
+	@PostMapping("/auth/rooms-of-property")
+	public List<RoomDto> viewAllSelected(@RequestBody List<Integer> roomIds) {
+		return roomService.getRoomsByIdList(roomIds);
 	}
 
 }

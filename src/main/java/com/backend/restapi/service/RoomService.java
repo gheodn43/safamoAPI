@@ -106,41 +106,39 @@ public class RoomService {
 
 	public List<RoomPrivateOutputDto> getAllForOwner(int propertyId) {
 		Optional<PropertyEntity> propertyOptional = propertyRepository.findById(propertyId);
-	    if (propertyOptional.isEmpty()) {
-	        return new ArrayList<>();
-	    }
-	    PropertyEntity property = propertyOptional.get();
-	    List<RoomEntity> rooms = roomRepository.findByProperty(property);
-	    List<RoomPrivateOutputDto> roomDtos = rooms.stream()
-		        .map(room -> {
-		        	RoomPrivateOutputDto roomInfo = new RoomPrivateOutputDto();
-		        	roomInfo.setRoom_id(room.getId());
-		        	roomInfo.setRoomName(room.getRoomName());
-		        	roomInfo.setProperty_id(property.getPropertyId());
-		        	roomInfo.setPropertyName(property.getPropertyName());
-		        	roomInfo.setPrice(room.getPrice());
-		        	roomInfo.setStatus(room.getStatus().getName());
-					List<String> tagsName = new ArrayList<>();
-					List<String> pictureURLs = new ArrayList<>();
-					List<RoomPicture> roomPictures = roomPictureRepository.findByRoomEntity(room);
-					List<RoomRole> tags = room.getRoles();
-					for (RoomRole tag : tags) {
-						String TagName = tag.getName();
-						tagsName.add(TagName);
-					}
-					for (RoomPicture picture : roomPictures) {
-						String pictureURL = picture.getPictureURL();
-						pictureURLs.add(pictureURL);
-					}
-					roomInfo.setPicturesURL(pictureURLs);
-					roomInfo.setTags(tagsName);
-					roomInfo.setRatingStar(room.getStarRating());
-		            return roomInfo;
-		        })
-		        .collect(Collectors.toList());
-		    return roomDtos;
+		if (propertyOptional.isEmpty()) {
+			return new ArrayList<>();
+		}
+		PropertyEntity property = propertyOptional.get();
+		List<RoomEntity> rooms = roomRepository.findByProperty(property);
+		List<RoomPrivateOutputDto> roomDtos = rooms.stream().map(room -> {
+			RoomPrivateOutputDto roomInfo = new RoomPrivateOutputDto();
+			roomInfo.setRoom_id(room.getId());
+			roomInfo.setRoomName(room.getRoomName());
+			roomInfo.setProperty_id(property.getPropertyId());
+			roomInfo.setPropertyName(property.getPropertyName());
+			roomInfo.setPrice(room.getPrice());
+			roomInfo.setStatus(room.getStatus().getName());
+			List<String> tagsName = new ArrayList<>();
+			List<String> pictureURLs = new ArrayList<>();
+			List<RoomPicture> roomPictures = roomPictureRepository.findByRoomEntity(room);
+			List<RoomRole> tags = room.getRoles();
+			for (RoomRole tag : tags) {
+				String TagName = tag.getName();
+				tagsName.add(TagName);
+			}
+			for (RoomPicture picture : roomPictures) {
+				String pictureURL = picture.getPictureURL();
+				pictureURLs.add(pictureURL);
+			}
+			roomInfo.setPicturesURL(pictureURLs);
+			roomInfo.setTags(tagsName);
+			roomInfo.setRatingStar(room.getStarRating());
+			return roomInfo;
+		}).collect(Collectors.toList());
+		return roomDtos;
 	}
-	
+
 	public RoomDto getOneforPropertyOwner(int roomId, int user_id) {
 		Optional<RoomEntity> roomOptional = roomRepository.findById(roomId);
 		if (roomOptional.isPresent()) {
@@ -454,7 +452,7 @@ public class RoomService {
 			return new ResponseEntity<>("Không tìm thấy phòng với ID đã cho", HttpStatus.NOT_FOUND);
 		}
 	}
-	
+
 	public ResponseEntity<String> draftContract(int roomId) {
 		Optional<RoomEntity> roomOptional = roomRepository.findById(roomId);
 		if (roomOptional.isPresent()) {
@@ -464,7 +462,8 @@ public class RoomService {
 				// Lấy trạng thái "Soạn hợp đồng" từ cơ sở dữ liệu
 				RoomStatus activeStatus = roomStatusRepository.findById(6).orElse(null);
 				if (activeStatus == null) {
-					return new ResponseEntity<>("Không tìm thấy trạng thái 'Đang khởi tạo hợp đồng'", HttpStatus.BAD_REQUEST);
+					return new ResponseEntity<>("Không tìm thấy trạng thái 'Đang khởi tạo hợp đồng'",
+							HttpStatus.BAD_REQUEST);
 				}
 				room.setStatus(activeStatus);
 				roomRepository.save(room);
@@ -476,7 +475,7 @@ public class RoomService {
 			return new ResponseEntity<>("Không tìm thấy phòng với ID đã cho", HttpStatus.NOT_FOUND);
 		}
 	}
-	
+
 	public ResponseEntity<String> joinRoom(int roomId) {
 		Optional<RoomEntity> roomOptional = roomRepository.findById(roomId);
 		if (roomOptional.isPresent()) {
@@ -498,7 +497,7 @@ public class RoomService {
 			return new ResponseEntity<>("Không tìm thấy phòng với ID đã cho", HttpStatus.NOT_FOUND);
 		}
 	}
-	
+
 	public ResponseEntity<String> FindCompound(int roomId) {
 		Optional<RoomEntity> roomOptional = roomRepository.findById(roomId);
 		if (roomOptional.isPresent()) {
@@ -519,7 +518,7 @@ public class RoomService {
 			return new ResponseEntity<>("Không tìm thấy phòng với ID đã cho", HttpStatus.NOT_FOUND);
 		}
 	}
-	
+
 	public ResponseEntity<String> CancelFindCompound(int roomId) {
 		Optional<RoomEntity> roomOptional = roomRepository.findById(roomId);
 		if (roomOptional.isPresent()) {
@@ -539,6 +538,46 @@ public class RoomService {
 		} else {
 			return new ResponseEntity<>("Không tìm thấy phòng với ID đã cho", HttpStatus.NOT_FOUND);
 		}
+	}
+
+	public List<RoomDto> getRoomsByIdList(List<Integer> idList) {
+		List<RoomEntity> rooms = roomRepository.findAllById(idList);
+		List<RoomDto> roomDtos = rooms.stream().map(roomEntity -> {
+			RoomDto roomDto = new RoomDto();
+			roomDto.setRoom_id(roomEntity.getId());
+			roomDto.setRoomName(roomEntity.getRoomName());
+			roomDto.setDescription(roomEntity.getDescription());
+			roomDto.setProperty_id(roomEntity.getProperty().getPropertyId());
+			roomDto.setAddress(roomEntity.getProperty().getAddress());
+			roomDto.setPropertyName(roomEntity.getProperty().getPropertyName());
+			roomDto.setAcreage(roomEntity.getAcreage());
+			roomDto.setPrice(roomEntity.getPrice());
+			roomDto.setMaxQuantity(roomEntity.getMaxQuantity());
+			roomDto.setStatus(roomEntity.getStatus().getName());
+			roomDto.setGpsAddress(roomEntity.getProperty().getGpsAddress());
+			List<Integer> tagsId = new ArrayList<>();
+			List<String> tagsName = new ArrayList<>();
+			List<String> pictureURLs = new ArrayList<>();
+			List<RoomPicture> roomPictures = roomPictureRepository.findByRoomEntity(roomEntity);
+			List<RoomRole> tags = roomEntity.getRoles();
+			for (RoomRole tag : tags) {
+				int TagId = tag.getId();
+				String TagName = tag.getName();
+				tagsId.add(TagId);
+				tagsName.add(TagName);
+			}
+			for (RoomPicture picture : roomPictures) {
+				String pictureURL = picture.getPictureURL();
+				pictureURLs.add(pictureURL);
+			}
+			roomDto.setPicturesURL(pictureURLs);
+			roomDto.setTags(tagsName);
+			roomDto.setPicturesURL(pictureURLs);
+			roomDto.setRatingStar(roomEntity.getStarRating());
+			return roomDto;
+
+		}).collect(Collectors.toList());
+		return roomDtos;
 	}
 
 	public ResponseEntity<String> deleteRoomForOwner(int roomId, int user_id) {
