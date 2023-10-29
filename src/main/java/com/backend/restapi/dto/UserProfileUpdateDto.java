@@ -10,6 +10,7 @@ public class UserProfileUpdateDto {
 	private String cccd;
 	private String address;
 	private String avatarUrl;
+
 	public UserProfileUpdateDto() {
 		super();
 	}
@@ -70,5 +71,5 @@ public class UserProfileUpdateDto {
 	}
 	public void setCccd(String cccd) {
 		this.cccd = cccd;
-	}	
+	}
 }
