@@ -12,6 +12,7 @@ public class ContractDto {
 	private int partyA_id;
 	private int partyB_id;
 	private String contractLink;
+	private String status;
 
 	public int getId() {
 		return id;
@@ -77,6 +78,14 @@ public class ContractDto {
 
 	public void setContractLink(String contractLink) {
 		this.contractLink = contractLink;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 }

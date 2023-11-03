@@ -1,5 +1,4 @@
 package com.backend.restapi.models;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -10,8 +9,8 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name = "requestStatus")
-public class RequestStatus {
+@Table(name = "contractStatus")
+public class ContractStatus {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -34,6 +33,5 @@ public class RequestStatus {
 	public void setName(String name) {
 		this.name = name;
 	}
-    
     
 }

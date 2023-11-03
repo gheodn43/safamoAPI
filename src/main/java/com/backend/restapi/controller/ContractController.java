@@ -3,6 +3,7 @@ package com.backend.restapi.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,9 +32,15 @@ public class ContractController {
 	}
 	
 	@PostMapping("/contract/generate")
-	public ResponseEntity<String> generateContract(@RequestParam("rentRoom_id") int rentRoom_id,
+	public ResponseEntity<Integer> generateContract(
 			@RequestBody ContractDto contractDto) {
-			ResponseEntity<String> response = contractService.generateContract(contractDto, rentRoom_id);
-			return response;
+			ResponseEntity<Integer> contractId = contractService.generateContract(contractDto);
+			return contractId;
+	}
+	
+	@GetMapping("/contract/get")
+	public ResponseEntity<ContractDto> generateContract(@RequestParam("user_id") int userId, @RequestParam("room_id") int roomId) {
+		ResponseEntity<ContractDto> contract = contractService.getContractFromUserAndRoom(userId, roomId);
+			return contract;
 	}
 }

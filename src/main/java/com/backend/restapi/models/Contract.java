@@ -12,6 +12,10 @@ public class Contract {
     private int id;
 
     @ManyToOne
+    @JoinColumn(name = "contract_status_id")
+    private ContractStatus contractStatus;
+    
+    @ManyToOne
     @JoinColumn(name = "party_A_id")
     private UserEntity partyA;
 
@@ -104,6 +108,14 @@ public class Contract {
 
 	public void setContractLink(String contractLink) {
 		this.contractLink = contractLink;
+	}
+
+	public ContractStatus getContractStatus() {
+		return contractStatus;
+	}
+
+	public void setContractStatus(ContractStatus contractStatus) {
+		this.contractStatus = contractStatus;
 	}
 
     
