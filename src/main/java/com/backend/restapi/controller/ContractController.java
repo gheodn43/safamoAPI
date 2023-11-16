@@ -32,15 +32,16 @@ public class ContractController {
 	}
 	
 	@PostMapping("/contract/generate")
-	public ResponseEntity<Integer> generateContract(
+	public Integer generateContract(
 			@RequestBody ContractDto contractDto) {
-			ResponseEntity<Integer> contractId = contractService.generateContract(contractDto);
+			Integer contractId = contractService.generateContract(contractDto);
 			return contractId;
 	}
 	
-	@GetMapping("/contract/get")
-	public ResponseEntity<ContractDto> generateContract(@RequestParam("user_id") int userId, @RequestParam("room_id") int roomId) {
+	@GetMapping("/auth/contract")
+	public ResponseEntity<ContractDto> getOneContract(@RequestParam("user_id") int userId, @RequestParam("room_id") int roomId) {
 		ResponseEntity<ContractDto> contract = contractService.getContractFromUserAndRoom(userId, roomId);
 			return contract;
 	}
+
 }

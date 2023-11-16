@@ -20,7 +20,6 @@ import com.backend.restapi.models.Request;
 import com.backend.restapi.models.RequestRole;
 import com.backend.restapi.models.RequestStatus;
 import com.backend.restapi.models.RoomEntity;
-import com.backend.restapi.models.User;
 import com.backend.restapi.models.UserEntity;
 import com.backend.restapi.repository.PropertyRepository;
 import com.backend.restapi.repository.RequestRepository;
@@ -177,7 +176,7 @@ public class RequestService {
 	}
 
 	@Transactional
-	public void acceptRentalRequest(int requestId, String contractLink) {
+	public void acceptRentalRequest(int requestId) {
 		RequestStatus acceptedStatus = requestStatusRepository.findById(3).orElse(null);
 		Request requestToAccept = requestRepository.findById(requestId).orElse(null);
 //	    UserEntity recipient = requestToAccept.getUser();

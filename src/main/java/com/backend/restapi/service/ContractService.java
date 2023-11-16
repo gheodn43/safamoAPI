@@ -39,7 +39,7 @@ public class ContractService {
 		this.contractStatusRepository = contractStatusRepository;
 	}
 
-	public ResponseEntity<Integer> generateContract(ContractDto contractDto) {
+	public Integer generateContract(ContractDto contractDto) {
 		Contract contract = new Contract();
 		RoomEntity room = roomRepository.findById(contractDto.getRoom_id()).orElse(null);
 		UserEntity partyA = userRepository.findById(contractDto.getPartyA_id()).orElse(null);
@@ -54,24 +54,38 @@ public class ContractService {
 		contract.setRoom(room);
 		contract.setContractStatus(status);
 		contractRepository.save(contract);
-		return new ResponseEntity<>(contract.getId(), HttpStatus.OK);
+		return contract.getId();
 	}
 
 	public ResponseEntity<ContractDto> getContractFromUserAndRoom(int user_id, int room_id) {
-		ContractDto contractDto = new ContractDto();
-		UserEntity user = userRepository.findById(user_id).orElse(null);
-		RoomEntity room = roomRepository.findById(room_id).orElse(null);
-		ContractStatus status = contractStatusRepository.findById(1).orElse(null);
-		List<Contract>  contracts = new ArrayList<>();
-		contracts = contractRepository.findByContractStatus(status);
-		for (Contract contract : contracts) {
-			if(contract.getPartyB().equals(user) && contract.getRoom().equals(room)) {
-				contractDto.setContractLink(contract.getContractLink());
-				contractDto.setDurationTime(contract.getDurationTime());
-				contractDto.setRoom_id(contract.getRoom().getId());
-			}
-		}
-		return new ResponseEntity<>(contractDto, HttpStatus.OK);
+	    ContractDto contractDto = new ContractDto();
+	    UserEntity user = userRepository.findById(user_id).orElse(null);
+	    RoomEntity room = roomRepository.findById(room_id).orElse(null);
+	    
+	    if (user == null || room == null) {
+	        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	    }
+	    
+	    ContractStatus status = contractStatusRepository.findById(1).orElse(null);
+	    
+	    if (status == null) {
+	        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	    }
+	    
+	    List<Contract> contracts = contractRepository.findByPartyBAndRoomAndContractStatus(user, room, status);
+	    
+	    if (!contracts.isEmpty()) {
+	        Contract contract = contracts.get(0);
+	        
+	        contractDto.setContractLink(contract.getContractLink());
+	        contractDto.setDurationTime(contract.getDurationTime());
+	        contractDto.setRoom_id(contract.getRoom().getId());
+	        
+	        return new ResponseEntity<>(contractDto, HttpStatus.OK);
+	    } else {
+	        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	    }
 	}
+
 
 }

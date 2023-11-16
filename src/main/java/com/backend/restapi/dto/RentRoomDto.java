@@ -5,10 +5,11 @@ import com.backend.restapi.models.UserEntity;
 
 public class RentRoomDto {
 	private int id;
+	private int user_id;
 	private int room_id;
 	private int contract_id;
-	private UserEntity user;
-	private int dependentId;
+	private int dependent_user_id;
+	
 	public int getId() {
 		return id;
 	}
@@ -27,19 +28,17 @@ public class RentRoomDto {
 	public void setContract_id(int contract_id) {
 		this.contract_id = contract_id;
 	}
-	public UserEntity getUser() {
-		return user;
+	public int getDependent_user_id() {
+		return dependent_user_id;
 	}
-	public void setUser(UserEntity user) {
-		this.user = user;
+	public void setDependent_user_id(int dependent_user_id) {
+		this.dependent_user_id = dependent_user_id;
 	}
-	public int getDependentId() {
-		return dependentId;
+	public int getUser_id() {
+		return user_id;
 	}
-	public void setDependentId(int dependentId) {
-		this.dependentId = dependentId;
+	public void setUser_id(int user_id) {
+		this.user_id = user_id;
 	}
 
-	
-	
 }

@@ -11,4 +11,5 @@ import com.backend.restapi.models.UserEntity;
 
 public interface RentRoomRepositoty  extends JpaRepository<RentRoom, Integer> {
 	List<RentRoom> findByUser(UserEntity user);
+	List<RentRoom> findByRoom (RoomEntity room);
 }

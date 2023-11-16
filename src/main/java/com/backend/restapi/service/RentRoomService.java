@@ -11,8 +11,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.backend.restapi.dto.RentRoomDto;
+import com.backend.restapi.dto.RentRoomDto2;
 import com.backend.restapi.dto.RoomDto;
 import com.backend.restapi.exception.CustomException;
+import com.backend.restapi.models.Contract;
 import com.backend.restapi.models.PropertyEntity;
 import com.backend.restapi.models.PropertyStatus;
 import com.backend.restapi.models.RentRoom;
@@ -47,13 +49,15 @@ public class RentRoomService {
 		this.roomPictureRepository = roomPictureRepository;
 	}
 
-	public ResponseEntity<Integer> joinRoom(int user_id, int room_id) {
-		RoomEntity room = roomRepository.findById(room_id).orElse(null);
-		UserEntity user = userRepository.findById(user_id).orElse(null);
+	public ResponseEntity<Integer> joinRoom(RentRoomDto dto) {
+		RoomEntity room = roomRepository.findById(dto.getRoom_id()).orElse(null);
+		UserEntity user = userRepository.findById(dto.getUser_id()).orElse(null);
+		Contract contract = contaContractRepository.findById(dto.getContract_id()).orElse(null);
 		RentRoom rentRoom = new RentRoom();
 		rentRoom.setRoom(room);
 		rentRoom.setUser(user);
-		rentRoom.setDependent(null);
+		rentRoom.setDependent_user(user);
+		rentRoom.setContract(contract);
 		rentRoomRepositoty.save(rentRoom);
 		return new ResponseEntity<>(rentRoom.getId(), HttpStatus.OK);
 	}
@@ -65,7 +69,7 @@ public class RentRoomService {
 			RentRoom rentRoom = new RentRoom();
 			rentRoom.setRoom(rentRoomDependent.getRoom());
 			rentRoom.setUser(user);
-			rentRoom.setDependent(rentRoomDependent);
+			rentRoom.setDependent_user(rentRoomDependent.getDependent_user());
 			rentRoomRepositoty.save(rentRoom);
 			return new ResponseEntity<>("Chúc mừng bạn đã gia nhap phòng thành công", HttpStatus.OK);
 		} else {
@@ -123,28 +127,46 @@ public class RentRoomService {
 		return roomDtos;
 	}
 
-	public List<RentRoomDto> getAllRentRooms(int user_id) {
+	public List<RoomDto> getAllRentRooms(int user_id) {
 	    UserEntity owner = userRepository.findById(user_id).orElse(null);
 	    if (owner == null) {
 	        return new ArrayList<>();
 	    }
 	    List<RentRoom> rentRooms = rentRoomRepositoty.findByUser(owner);
-
-	    List<RentRoomDto> rentRoomDtos = new ArrayList<>();
-
+	    List<RoomDto> roomDtos = new ArrayList<>();
 	    for (RentRoom rentRoom : rentRooms) {
-	        RentRoomDto rentRoomDto = new RentRoomDto();
-	        rentRoomDto.setId(rentRoom.getId());
-	        rentRoomDto.setRoom_id(rentRoom.getRoom().getId());
-	        rentRoomDto.setDependentId(rentRoom.getDependent() != null ? rentRoom.getDependent().getId() : 0);
-	        rentRoomDtos.add(rentRoomDto);
+	    	RoomDto dto = new RoomDto();
+	    	RoomEntity roomEntity = roomRepository.findById(rentRoom.getRoom().getId()).orElse(null);
+	    	dto.setRoom_id(roomEntity.getId());
+			dto.setRoomName(roomEntity.getRoomName());
+			dto.setPropertyName(roomEntity.getProperty().getPropertyName());
+			dto.setPrice(roomEntity.getPrice());
+			List<Integer> tagsId = new ArrayList<>();
+			List<String> tagsName = new ArrayList<>();
+			List<String> pictureURLs = new ArrayList<>();
+			List<RoomPicture> roomPictures = roomPictureRepository.findByRoomEntity(roomEntity);
+			List<RoomRole> tags = roomEntity.getRoles();
+			for (RoomRole tag : tags) {
+				int TagId = tag.getId();
+				String TagName = tag.getName();
+				tagsId.add(TagId);
+				tagsName.add(TagName);
+			}
+			for (RoomPicture picture : roomPictures) {
+				String pictureURL = picture.getPictureURL();
+				pictureURLs.add(pictureURL);
+			}
+			dto.setTagIds(tagsId);
+			dto.setTags(tagsName);
+			dto.setPicturesURL(pictureURLs);
+			
+			roomDtos.add(dto);
 	    }
-	    return rentRoomDtos;
+	    return roomDtos;
 	}
 	
-	public RoomDto getRoomRented(int rentRoom_id) {
-		RentRoom rentRoom = rentRoomRepositoty.findById(rentRoom_id).orElse(null);
-		RoomEntity roomEntity = roomRepository.findById(rentRoom.getRoom().getId()).orElse(null);
+	public RoomDto getRoomRented(int room_id) {
+		RoomEntity roomEntity = roomRepository.findById(room_id).orElse(null);
 		RoomDto dto = new RoomDto();
 		dto.setRoom_id(roomEntity.getId());
 		dto.setRoomName(roomEntity.getRoomName());
@@ -176,6 +198,39 @@ public class RentRoomService {
 		dto.setTags(tagsName);
 		dto.setPicturesURL(pictureURLs);
 		return dto;
+	}
+	
+//	public RentRoomDto getone(int room_id) {
+//		RoomEntity roomEntity = roomRepository.findById(room_id).orElse(null);
+//		RentRoom rentRoom = rentRoomRepositoty.findByRoom(roomEntity);
+//		if(rentRoom == null) return null;
+//		RentRoomDto dto = new RentRoomDto();
+//		dto.setUser_id(rentRoom.getUser().getUser_id());
+//		dto.setRoom_id(room_id);
+//		dto.setContract_id(rentRoom.getContract().getId());
+//		dto.setDependent_user_id(rentRoom.getDependent_user().getUser_id());
+//		
+//		return dto;
+//	}
+	
+	public List<RentRoomDto2> getRentRooms(int room_id) {
+		RoomEntity roomEntity = roomRepository.findById(room_id).orElse(null);
+		List<RentRoom> rentRooms = rentRoomRepositoty.findByRoom(roomEntity);
+		
+		List<RentRoomDto2> dtos = new ArrayList<RentRoomDto2>();
+		for (RentRoom rentRoom : rentRooms) {
+			RentRoomDto2 dto = new RentRoomDto2();
+			UserEntity user = rentRoom.getUser();
+			dto.setFullname(user.getFullname());
+			dto.setNTNS(user.getBirthdate());
+			dto.setCCCD(user.getCccd());
+			dto.setPhone_number(user.getPhone_number());
+			if(rentRoom.getDependent_user().equals(user)) 
+				dto.setDependent(true);
+			else dto.setDependent(false);
+			dtos.add(dto);
+		}
+		return dtos;
 	}
 
 }

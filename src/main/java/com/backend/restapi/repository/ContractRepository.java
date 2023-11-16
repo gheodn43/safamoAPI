@@ -12,4 +12,7 @@ import com.backend.restapi.models.UserEntity;
 
 public interface ContractRepository extends JpaRepository<Contract, Integer> {
 	List<Contract> findByContractStatus(ContractStatus contractStatus);
+
+	List<Contract> findByPartyBAndRoomAndContractStatus(UserEntity user, RoomEntity room, ContractStatus status);
+
 }

@@ -158,7 +158,7 @@ public class RoomController {
 		}
 	}
 
-	@PostMapping("/room/unlock/{roomId}") 
+	@PostMapping("/room/unlock/{roomId}")
 	public ResponseEntity<String> unlockRoom(@PathVariable int roomId,
 			@AuthenticationPrincipal UserDetails userDetails) {
 		if (userDetails.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ADMIN"))) {
@@ -168,7 +168,7 @@ public class RoomController {
 			throw new UnauthorizedException("Access denied");
 		}
 	}
-	
+
 	@PostMapping("/room/draft-contract/{roomId}") // cho landlord
 	public ResponseEntity<String> draftContractForRoom(@PathVariable int roomId,
 			@AuthenticationPrincipal UserDetails userDetails) {
@@ -179,26 +179,31 @@ public class RoomController {
 			throw new UnauthorizedException("Access denied");
 		}
 	}
-	
+
 	@PostMapping("/room/join/{roomId}") // cho customer
-	public ResponseEntity<String> joinRoom(@PathVariable int roomId,
-			@AuthenticationPrincipal UserDetails userDetails) {
-			ResponseEntity<String> response = roomService.joinRoom(roomId);
-			return response;
+	public ResponseEntity<String> joinRoom(@PathVariable int roomId, @AuthenticationPrincipal UserDetails userDetails) {
+		ResponseEntity<String> response = roomService.joinRoom(roomId);
+		return response;
 	}
-	
+
+	@GetMapping("/room/{roomId}")
+	public RoomDto getOne(@PathVariable int roomId) {
+		RoomDto response = roomService.getOneRoom(roomId);
+		return response;
+	}
+
 	@PostMapping("/room/find-compound/{roomId}") // cho customer
 	public ResponseEntity<String> FindCompound(@PathVariable int roomId,
 			@AuthenticationPrincipal UserDetails userDetails) {
-			ResponseEntity<String> response = roomService.FindCompound(roomId);
-			return response;
+		ResponseEntity<String> response = roomService.FindCompound(roomId);
+		return response;
 	}
-	
+
 	@PostMapping("/room/cancel-find-compound/{roomId}") // cho customer
 	public ResponseEntity<String> CancelFindCompound(@PathVariable int roomId,
 			@AuthenticationPrincipal UserDetails userDetails) {
-			ResponseEntity<String> response = roomService.CancelFindCompound(roomId);
-			return response;
+		ResponseEntity<String> response = roomService.CancelFindCompound(roomId);
+		return response;
 	}
 
 	@DeleteMapping("/my_room/delete/{roomId}")

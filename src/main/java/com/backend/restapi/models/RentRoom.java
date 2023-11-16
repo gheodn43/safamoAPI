@@ -11,8 +11,8 @@ public class RentRoom {
     private int id;
 
     @ManyToOne
-    @JoinColumn(name = "dependent__id")
-    private RentRoom dependent;
+    @JoinColumn(name = "dependent_user_id")
+    private UserEntity dependent_user;
     
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -34,12 +34,12 @@ public class RentRoom {
 		this.id = id;
 	}
 
-	public RentRoom getDependent() {
-		return dependent;
+	public UserEntity getDependent_user() {
+		return dependent_user;
 	}
 
-	public void setDependent(RentRoom dependent) {
-		this.dependent = dependent;
+	public void setDependent_user(UserEntity dependent_user) {
+		this.dependent_user = dependent_user;
 	}
 
 	public UserEntity getUser() {

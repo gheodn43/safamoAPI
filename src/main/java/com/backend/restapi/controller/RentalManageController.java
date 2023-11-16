@@ -144,10 +144,9 @@ public class RentalManageController {
 	}
 
 	@PostMapping("/req_rental/accept")
-	public ResponseEntity<String> acceptRentalRequest(@RequestParam("requestId") int requestId,
-			@RequestBody String contractLink) {
+	public ResponseEntity<String> acceptRentalRequest(@RequestParam("requestId") int requestId) {
 		try {
-			requestService.acceptRentalRequest(requestId, contractLink);
+			requestService.acceptRentalRequest(requestId);
 			return ResponseEntity.ok("Yêu cầu đã được thông qua.");
 		} catch (RuntimeException e) {
 			return ResponseEntity.badRequest().body(e.getMessage());

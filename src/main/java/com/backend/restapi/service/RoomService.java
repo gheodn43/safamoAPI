@@ -580,6 +580,43 @@ public class RoomService {
 		return roomDtos;
 	}
 
+	public RoomDto getOneRoom(int room_id) {
+		RoomEntity roomEntity = roomRepository.findById(room_id).orElse(null);
+		RoomDto roomDto = new RoomDto();
+		roomDto.setRoom_id(roomEntity.getId());
+		roomDto.setRoomName(roomEntity.getRoomName());
+		roomDto.setDescription(roomEntity.getDescription());
+		roomDto.setProperty_id(roomEntity.getProperty().getPropertyId());
+		roomDto.setAddress(roomEntity.getProperty().getAddress());
+		roomDto.setPropertyName(roomEntity.getProperty().getPropertyName());
+		roomDto.setAcreage(roomEntity.getAcreage());
+		roomDto.setPrice(roomEntity.getPrice());
+		roomDto.setMaxQuantity(roomEntity.getMaxQuantity());
+		roomDto.setStatus(roomEntity.getStatus().getName());
+		roomDto.setGpsAddress(roomEntity.getProperty().getGpsAddress());
+		List<Integer> tagsId = new ArrayList<>();
+		List<String> tagsName = new ArrayList<>();
+		List<String> pictureURLs = new ArrayList<>();
+		List<RoomPicture> roomPictures = roomPictureRepository.findByRoomEntity(roomEntity);
+		List<RoomRole> tags = roomEntity.getRoles();
+		for (RoomRole tag : tags) {
+			int TagId = tag.getId();
+			String TagName = tag.getName();
+			tagsId.add(TagId);
+			tagsName.add(TagName);
+		}
+		for (RoomPicture picture : roomPictures) {
+			String pictureURL = picture.getPictureURL();
+			pictureURLs.add(pictureURL);
+		}
+		roomDto.setPicturesURL(pictureURLs);
+		roomDto.setTags(tagsName);
+		roomDto.setPicturesURL(pictureURLs);
+		roomDto.setRatingStar(roomEntity.getStarRating());
+		return roomDto;
+
+	}
+
 	public ResponseEntity<String> deleteRoomForOwner(int roomId, int user_id) {
 		Optional<RoomEntity> roomOptional = roomRepository.findById(roomId);
 		if (roomOptional.isPresent()) {
